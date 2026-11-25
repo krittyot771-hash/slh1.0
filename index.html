@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>221B Stat Holmes | สำนักงานนักสืบสถิติ ม.2</title>
+
+  <!-- โหลดฟอนต์วิกตอเรียน (Playfair Display) คู่กับฟอนต์ไทยอ่านง่ายคมชัดบนมือถือ (Kanit & Prompt) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- โหลด Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            display: ['Kanit', 'Prompt', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Kanit', 'serif'],
+          },
+          colors: {
+            baker: {
+              950: '#120D0A',
+              900: '#1C140F',
+              800: '#2A1F17',
+              700: '#3B2C21',
+              600: '#543F2F',
+            },
+            brass: {
+              300: '#F2D57E',
+              400: '#DFB654',
+              500: '#C59632',
+              600: '#9A7120',
+            },
+            parchment: {
+              50: '#FCF8EE',
+              100: '#F5EBD6',
+              200: '#E8D6B3',
+              300: '#D4BC8B',
+            },
+            crimson: {
+              600: '#9B2226',
+              700: '#7C191D',
+              800: '#5C1114',
+            },
+            forest: {
+              500: '#2D6A4F',
+              600: '#1B4332',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ธีมสำนักงานนักสืบ 221B Baker Street (โทนไม้มะฮอกกานี ทองเหลือง และกระดาษเก่า) */
+    html, body {
+      background-color: #120D0A;
+      background-image:
+        radial-gradient(circle at 20% 10%, rgba(223, 182, 84, 0.10), transparent 40%),
+        radial-gradient(circle at 80% 85%, rgba(155, 34, 38, 0.10), transparent 45%),
+        repeating-linear-gradient(45deg, rgba(255, 235, 195, 0.015) 0px, rgba(255, 235, 195, 0.015) 2px, transparent 2px, transparent 10px);
+      color: #F5EBD6;
+      font-family: 'Prompt', sans-serif;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* พื้นผิวกระดาษบันทึกคดี (Parchment Dossier) */
+    .parchment-box {
+      background: linear-gradient(180deg, #FAF3E3 0%, #EFE0BE 100%);
+      color: #2A1F17;
+      border: 2px solid #B68F40;
+      box-shadow: inset 0 0 28px rgba(139, 98, 34, 0.18), 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    /* การ์ดไม้วิกตอเรียนขอบทองเหลือง */
+    .victorian-card {
+      background: linear-gradient(180deg, #251B14 0%, #1C140F 100%);
+      border: 1.5px solid rgba(197, 150, 50, 0.45);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ปุ่มกดที่รองรับนิ้วสัมผัสบนมือถือ (Touch-friendly) */
+    .btn-holmes {
+      transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-holmes:active:not(:disabled) {
+      transform: translateY(2px) scale(0.98);
+    }
+    .btn-holmes:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ปุ่มตราประทับครั่งสีแดงเลือดนก (Wax Seal Button) */
+    .btn-wax {
+      background: linear-gradient(180deg, #AE272C 0%, #7C191D 100%);
+      border: 1.5px solid #DFB654;
+      color: #FCF8EE;
+      box-shadow: 0 4px 12px rgba(124, 25, 29, 0.45);
+    }
+    .btn-wax:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    /* ปุ่มทองเหลืองโบราณ */
+    .btn-brass {
+      background: linear-gradient(180deg, #E8C56B 0%, #B88728 100%);
+      border: 1.5px solid #F7E1A0;
+      color: #1C140F;
+      box-shadow: 0 4px 12px rgba(197, 150, 50, 0.3);
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeSlideUp 0.26s ease-out forwards;
+    }
+
+    /* จุดข้อมูลที่ลากได้ในห้องแล็บเบเกอร์สตรีท */
+    .draggable-dot {
+      cursor: grab;
+      transition: filter 0.12s ease;
+    }
+    .draggable-dot:hover {
+      filter: drop-shadow(0 0 8px rgba(242, 213, 126, 0.95));
+    }
+    .draggable-dot.dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 0 12px rgba(242, 213, 126, 1));
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #120D0A; }
+    ::-webkit-scrollbar-thumb { background: #6E552B; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ==================== แถบนำทางหลัก (221B BAKER STREET HEADER) ==================== -->
+  <header class="sticky top-0 z-40 bg-baker-950/95 backdrop-blur-md border-b-2 border-brass-500/50 shadow-xl">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 py-2.5 space-y-2.5">
+      <!-- แถวบน: โลโก้ + โปรไฟล์นักเรียน + คะแนนรวม + เสียง -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <!-- ไอคอนแว่นขยายนักสืบ SVG -->
+          <div class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-full bg-gradient-to-br from-brass-400 to-brass-600 border-2 border-parchment-100 flex items-center justify-center text-xl sm:text-2xl shadow-lg">
+            🕵️‍♂️
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-serif text-base sm:text-xl font-bold text-brass-300 tracking-wide truncate">
+                221B Stat Holmes
+              </h1>
+              <span class="hidden sm:inline-block text-[10px] font-bold bg-crimson-700 text-parchment-50 border border-brass-400/60 px-2 py-0.5 rounded-full">
+                ม.2
+              </span>
+            </div>
+            <p class="text-[11px] sm:text-xs text-parchment-300 truncate">
+              สำนักงานนักสืบข้อมูล & ห้องทดลองสถิติ
+            </p>
+          </div>
+        </div>
+
+        <!-- ป้ายชื่อนักเรียน + คะแนนสะสม + ปุ่มเสียง -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button onclick="openProfileModal()" title="คลิกเพื่อแก้ไขชื่อ-นามสกุลนักเรียน"
+            class="btn-holmes flex items-center gap-2 bg-baker-800 hover:bg-baker-700 border border-brass-500/60 rounded-2xl px-2.5 sm:px-3.5 py-1.5 text-left">
+            <span class="text-base sm:text-lg">🎩</span>
+            <div class="leading-tight max-w-[110px] sm:max-w-[170px]">
+              <div id="hdr-student-name" class="text-xs sm:text-sm font-bold text-parchment-50 truncate">
+                ยังไม่ได้ลงชื่อ
+              </div>
+              <div class="text-[10px] sm:text-[11px] text-brass-300 font-semibold">
+                คะแนน: <span id="hdr-total-score">0</span> / 100
+              </div>
+            </div>
+          </button>
+
+          <button id="btn-sound" onclick="toggleSound()" title="เปิด/ปิดเสียง"
+            class="btn-holmes w-10 h-10 rounded-2xl bg-baker-800 hover:bg-baker-700 border border-brass-500/50 flex items-center justify-center text-base">
+            🔊
+          </button>
+        </div>
+      </div>
+
+      <!-- แถวล่าง: เมนู 4 แท็บแบบ Responsive Grid บนมือถือ (กดง่าย ไม่ตกขอบ ไม่มีสโครลแนวนอน) -->
+      <nav class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+        <button onclick="switchModule('detective')" id="tab-detective"
+          class="nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 btn-brass">
+          <span>🔍</span><span class="truncate">1. ไขคดีต้น-ใบ</span>
+        </button>
+        <button onclick="switchModule('sandbox')" id="tab-sandbox"
+          class="nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-baker-800 text-parchment-200 border border-brass-500/35 hover:bg-baker-700">
+          <span>⚗️</span><span class="truncate">2. ห้องแล็บกราฟ</span>
+        </button>
+        <button onclick="switchModule('esports')" id="tab-esports"
+          class="nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-baker-800 text-parchment-200 border border-brass-500/35 hover:bg-baker-700">
+          <span>♟️</span><span class="truncate">3. ศึก E-Sports</span>
+        </button>
+        <button onclick="switchModule('scores')" id="tab-scores"
+          class="nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-baker-800 text-parchment-200 border border-brass-500/35 hover:bg-baker-700">
+          <span>📜</span><span class="truncate">4. บันทึกคะแนน</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== กล่องแจ้งเตือน (TOAST NOTIFICATION) ==================== -->
+  <div id="toast-container" class="fixed top-28 sm:top-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2 w-full max-w-md px-4"></div>
+
+  <!-- ==================== โมดอลลงทะเบียนนักสืบ (กรอกชื่อ-ชั้น-เลขที่) ==================== -->
+  <div id="profile-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="parchment-box rounded-3xl w-full max-w-md p-5 sm:p-7 space-y-4 animate-in relative">
+      <!-- ตราประทับด้านบน -->
+      <div class="text-center space-y-1">
+        <div class="w-16 h-16 mx-auto rounded-full bg-crimson-700 border-4 border-brass-400 flex items-center justify-center text-3xl shadow-lg">
+          🕵️‍♂️
+        </div>
+        <div class="font-serif text-xs uppercase tracking-widest text-crimson-700 font-bold pt-1">
+          221B Baker Street • Detective Registry
+        </div>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold text-baker-900">
+          ลงทะเบียนนักสืบสถิติ ม.2
+        </h2>
+        <p class="text-xs sm:text-sm text-baker-700">
+          กรอกข้อมูลของนักเรียนเพื่อบันทึกคะแนนสะสมทั้ง 4 ภารกิจลงสมุดบันทึกของวัตสัน
+        </p>
+      </div>
+
+      <form onsubmit="saveStudentProfile(event)" class="space-y-3.5">
+        <div>
+          <label for="inp-student-name" class="block text-xs sm:text-sm font-bold text-baker-900 mb-1">
+            ชื่อ - นามสกุล (หรือชื่อเล่น) <span class="text-crimson-700">*</span>
+          </label>
+          <input id="inp-student-name" type="text" required maxlength="40"
+            placeholder="เช่น ด.ช. เชอร์ล็อก รักสถิติ"
+            class="w-full px-4 py-3 rounded-xl border-2 border-brass-600/60 bg-parchment-50 text-baker-900 font-semibold text-base focus:outline-none focus:border-crimson-700" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="inp-student-class" class="block text-xs sm:text-sm font-bold text-baker-900 mb-1">
+              ชั้น / ห้อง
+            </label>
+            <input id="inp-student-class" type="text" maxlength="12" value="ม.2/1"
+              placeholder="เช่น ม.2/1"
+              class="w-full px-3.5 py-3 rounded-xl border-2 border-brass-600/60 bg-parchment-50 text-baker-900 font-semibold text-base focus:outline-none focus:border-crimson-700" />
+          </div>
+          <div>
+            <label for="inp-student-no" class="block text-xs sm:text-sm font-bold text-baker-900 mb-1">
+              เลขที่
+            </label>
+            <input id="inp-student-no" type="number" min="1" max="99"
+              placeholder="เช่น 12"
+              class="w-full px-3.5 py-3 rounded-xl border-2 border-brass-600/60 bg-parchment-50 text-baker-900 font-semibold text-base focus:outline-none focus:border-crimson-700" />
+          </div>
+        </div>
+
+        <div class="pt-2 flex flex-col gap-2">
+          <button type="submit" class="btn-holmes btn-wax w-full py-3.5 rounded-2xl font-display text-lg font-bold">
+            🖋️ ลงนามรับตำแหน่งนักสืบ & เริ่มปฏิบัติการ
+          </button>
+          <button type="button" onclick="closeProfileModal()" class="btn-holmes w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold text-baker-700 hover:bg-parchment-200/80">
+            ปิดไว้ก่อน (เข้าทดลองดูก่อน)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== พื้นที่หลักของแต่ละโมดูล ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6">
+
+    <!-- =========================================================================
+         โมดูลที่ 1: แฟ้มคดีนักสืบข้อมูล (THE BAKER STREET CASE FILES)
+         ========================================================================= -->
+    <section id="mod-detective" class="animate-in space-y-4 sm:space-y-5">
+      <!-- หัวข้อคดีและปุ่มเลือกแฟ้มคดี -->
+      <div class="victorian-card rounded-3xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex flex-wrap items-center gap-1.5 bg-crimson-800/80 text-brass-300 border border-brass-500/40 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold mb-2">
+            <span>🔍 CASE DOSSIER</span>
+            <span>•</span>
+            <span>แผนภาพต้น-ใบ, มัธยฐาน & Outlier (คดีละ 25 คะแนน)</span>
+          </div>
+          <h2 id="det-case-title" class="font-display text-xl sm:text-3xl font-bold text-parchment-50 leading-snug">
+            แฟ้มคดี #01: ตามหาตัวจริงแอดมินเพจลับแห่งเบเกอร์สตรีท
+          </h2>
+          <p id="det-case-desc" class="text-parchment-300 text-xs sm:text-base mt-1 leading-relaxed">
+            จัดเรียงข้อมูลดิบลงแผนภาพต้น-ใบ (Stem-and-Leaf) เพื่อไขความลับทางสถิติและออกหมายจับคนร้ายตัวจริง!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 lg:flex items-center gap-2 shrink-0">
+          <button onclick="loadDetectiveCase(0)" id="btn-case-0" class="btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold btn-brass">
+            📁 คดี #01 <span id="badge-case-0"></span>
+          </button>
+          <button onclick="loadDetectiveCase(1)" id="btn-case-1" class="btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/40">
+            📁 คดี #02 <span id="badge-case-1"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <!-- ฝั่งซ้าย: ข้อมูลดิบ + กระดานแผนภาพต้น-ใบ -->
+        <div class="lg:col-span-7 space-y-4 sm:space-y-5">
+          <!-- ขั้นที่ 1: การ์ดผู้ต้องสงสัย -->
+          <div class="victorian-card rounded-3xl p-4 sm:p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+              <h3 class="font-display text-base sm:text-lg font-bold text-brass-300 flex items-center gap-2">
+                <span>🗂️</span> ขั้นที่ 1: หลักฐานดิบของผู้ต้องสงสัย 7 คน
+              </h3>
+              <span id="det-data-unit" class="text-xs font-bold bg-baker-950 text-brass-300 px-3 py-1 rounded-full border border-brass-500/40">
+                หน่วย: นาที
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-parchment-300 mb-3">
+              👉 <b>วิธีเล่นบนมือถือ/คอม:</b> แตะเลือกการ์ดผู้ต้องสงสัย 1 ใบ แล้วแตะที่แถว <b>"ต้น (หลักสิบ)"</b> ในตารางด้านล่างเพื่อวางค่าหลักหน่วย
+            </p>
+
+            <!-- กริดการ์ดผู้ต้องสงสัย (3 คอลัมน์บนมือถือจอเล็ก 4 บนจอใหญ่ กดง่าย) -->
+            <div id="det-raw-cards" class="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-2.5"></div>
+          </div>
+
+          <!-- ขั้นที่ 2: กระดานแผนภาพต้น-ใบ -->
+          <div class="victorian-card rounded-3xl p-4 sm:p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h3 class="font-display text-base sm:text-lg font-bold text-brass-300 flex items-center gap-2">
+                <span>📜</span> ขั้นที่ 2: แผนภาพต้น-ใบ (Stem-and-Leaf)
+              </h3>
+              <div class="flex items-center gap-1.5">
+                <button onclick="autoFillStemLeaf()" class="btn-holmes bg-baker-700 hover:bg-baker-600 border border-brass-500/40 text-xs font-bold text-parchment-100 px-3 py-2 rounded-xl">
+                  ⚡ ช่วยเรียง
+                </button>
+                <button onclick="resetDetectivePlot()" class="btn-holmes bg-baker-950 hover:bg-baker-800 text-xs font-bold text-parchment-300 px-3 py-2 rounded-xl border border-brass-500/30">
+                  🔄 ล้าง
+                </button>
+              </div>
+            </div>
+
+            <!-- แถบสถานะผู้ต้องสงสัยที่กำลังถืออยู่ในมือ (ช่วยให้เล่นบนมือถือไม่งง) -->
+            <div id="det-selected-banner" class="mb-3 px-3.5 py-2 rounded-xl bg-baker-950/90 border border-brass-500/40 text-xs sm:text-sm text-parchment-200 flex items-center justify-between">
+              <span>👆 แตะเลือกการ์ดผู้ต้องสงสัยด้านบนก่อน แล้วค่อยแตะแถว "ต้น" ด้านล่าง</span>
+            </div>
+
+            <!-- ตารางกระดาษเก่าแบบแผนภาพต้น-ใบ -->
+            <div class="parchment-box rounded-2xl overflow-hidden">
+              <div class="grid grid-cols-12 bg-baker-800 text-brass-300 border-b-2 border-brass-600 text-xs sm:text-sm font-bold">
+                <div class="col-span-3 p-2.5 sm:p-3 text-center border-r border-brass-600/60">ต้น (หลักสิบ)</div>
+                <div class="col-span-9 p-2.5 sm:p-3">ใบ (หลักหน่วย • เรียงน้อย ➔ มาก)</div>
+              </div>
+              <div id="det-stem-rows" class="divide-y divide-brass-600/30"></div>
+            </div>
+
+            <!-- สรุปค่ากลาง (ปลดล็อกเมื่อวางครบ) -->
+            <div id="det-stats-summary" class="hidden mt-4 grid grid-cols-3 gap-2 animate-in">
+              <div class="bg-crimson-800/40 border border-crimson-600/70 rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-parchment-200 font-bold">ค่าเฉลี่ย (Mean)</div>
+                <div id="det-stat-mean" class="font-display text-lg sm:text-xl font-bold text-parchment-50">-</div>
+              </div>
+              <div class="bg-forest-600/50 border border-emerald-400/50 rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-emerald-200 font-bold">มัธยฐาน (Median)</div>
+                <div id="det-stat-median" class="font-display text-lg sm:text-xl font-bold text-parchment-50">-</div>
+              </div>
+              <div class="bg-brass-600/25 border border-brass-400/60 rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-brass-300 font-bold">ฐานนิยม (Mode)</div>
+                <div id="det-stat-mode" class="font-display text-sm sm:text-lg font-bold text-parchment-50 mt-0.5">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ฝั่งขวา: สมุดเบาะแส + ฮิสโทแกรม + ออกหมายจับ -->
+        <div class="lg:col-span-5 space-y-4 sm:space-y-5">
+          <!-- กระดาษเบาะแสลับ -->
+          <div class="parchment-box rounded-3xl p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="font-display text-base sm:text-lg font-bold text-crimson-700 flex items-center gap-1.5">
+                <span>🕯️</span> บันทึกเบาะแสของโฮมส์
+              </h3>
+              <span id="det-clue-status" class="text-[11px] font-bold bg-baker-800 text-brass-300 px-2.5 py-1 rounded-full">
+                รอสร้างกราฟครบ
+              </span>
+            </div>
+            <div id="det-clues-list" class="space-y-2.5 text-xs sm:text-sm text-baker-900"></div>
+          </div>
+
+          <!-- มินิฮิสโทแกรมปรับความกว้างอันตรภาคชั้นได้ -->
+          <div class="victorian-card rounded-3xl p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="font-display text-sm sm:text-base font-bold text-brass-300">📊 ฮิสโทแกรมตรวจสอบการกระจาย</h3>
+              <div class="flex items-center gap-1.5 text-xs">
+                <span class="text-parchment-300">กว้างชั้น:</span>
+                <select id="det-bin-width" onchange="renderDetectiveHistogram()"
+                  class="bg-baker-950 border border-brass-500/50 rounded-lg px-2 py-1.5 text-parchment-100 font-bold">
+                  <option value="10" selected>10</option>
+                  <option value="15">15</option>
+                  <option value="20">20</option>
+                </select>
+              </div>
+            </div>
+            <div id="det-histogram" class="h-36 flex items-end justify-around gap-1.5 bg-baker-950/90 border border-brass-500/30 rounded-2xl p-3 pt-6"></div>
+          </div>
+
+          <!-- แผงชี้ตัวออกหมายจับ -->
+          <div class="victorian-card border-2 border-brass-400/70 rounded-3xl p-4 sm:p-5 space-y-3">
+            <h3 class="font-display text-base sm:text-lg font-bold text-parchment-50 flex items-center gap-2">
+              <span>⚖️</span> ขั้นที่ 3: ชี้ตัวผู้กระทำผิด (+25 คะแนน)
+            </h3>
+            <div>
+              <label for="det-suspect-select" class="block text-xs text-parchment-300 mb-1.5">เลือกผู้ต้องสงสัยที่ตรงกับหลักฐานทั้งหมด:</label>
+              <select id="det-suspect-select" class="w-full min-h-[46px] bg-baker-950 border-2 border-brass-500/50 rounded-xl px-3.5 py-2.5 text-parchment-50 font-bold text-sm sm:text-base focus:outline-none focus:border-brass-300">
+                <option value="">-- เลือกผู้ต้องสงสัย --</option>
+              </select>
+            </div>
+            <button onclick="submitDetectiveArrest()" class="btn-holmes btn-wax w-full py-3.5 rounded-2xl font-display text-base sm:text-lg font-bold">
+              🖋️ ประทับตราออกหมายจับ & ปิดคดี!
+            </button>
+            <div id="det-result-box" class="hidden rounded-2xl p-3.5 text-xs sm:text-sm font-medium leading-relaxed"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         โมดูลที่ 2: ห้องแล็บเบเกอร์สตรีท (INTERACTIVE OUTLIER LAB)
+         ========================================================================= -->
+    <section id="mod-sandbox" class="hidden animate-in space-y-4 sm:space-y-5">
+      <!-- หัวข้อและชุดข้อมูลวัยรุ่น -->
+      <div class="victorian-card rounded-3xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex flex-wrap items-center gap-1.5 bg-forest-600/80 text-emerald-200 border border-emerald-400/40 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold mb-2">
+            <span>⚗️ BAKER STREET STAT LAB</span>
+            <span>•</span>
+            <span>แผนภาพจุด & ผลกระทบของค่าผิดปกติ (25 คะแนน)</span>
+          </div>
+          <h2 class="font-display text-xl sm:text-3xl font-bold text-parchment-50">
+            ห้องทดลองกราฟมีชีวิต (Outlier Sandbox)
+          </h2>
+          <p class="text-parchment-300 text-xs sm:text-base mt-1">
+            ใช้นิ้วหรือเมาส์ <b>"ลากจุดทองเหลืองซ้าย-ขวา"</b> หรือกดเพิ่มค่าผิดปกติ (Outlier) แล้วสังเกตเส้น Mean กับ Median ที่ขยับแบบสดๆ!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 lg:flex gap-1.5 sm:gap-2">
+          <button onclick="loadSandboxPreset('tiktok')" id="preset-tiktok" class="preset-btn btn-holmes min-h-[42px] px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold btn-brass">
+            🎵 TikTok
+          </button>
+          <button onclick="loadSandboxPreset('gaming')" id="preset-gaming" class="preset-btn btn-holmes min-h-[42px] px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/35">
+            🕹️ เล่นเกม
+          </button>
+          <button onclick="loadSandboxPreset('skins')" id="preset-skins" class="preset-btn btn-holmes min-h-[42px] px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/35">
+            💎 สกินเกม
+          </button>
+        </div>
+      </div>
+
+      <!-- แผงมาตรวัดค่ากลาง 3 ตัวแบบเรียลไทม์ (กระชับ อ่านชัดบนมือถือ) -->
+      <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        <div class="victorian-card border-2 border-crimson-600/80 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center sm:text-left sm:flex items-center justify-between">
+          <div>
+            <div class="text-[11px] sm:text-sm font-bold text-rose-300">ค่าเฉลี่ย (Mean)</div>
+            <div class="hidden sm:block text-xs text-parchment-300 mt-0.5">ไวต่อ Outlier มาก!</div>
+          </div>
+          <div class="sm:text-right mt-1 sm:mt-0">
+            <div id="lab-mean-val" class="font-display text-2xl sm:text-4xl font-bold text-rose-400">0.0</div>
+            <div id="lab-mean-diff" class="text-[10px] sm:text-xs text-parchment-300">ต่าง 0.0</div>
+          </div>
+        </div>
+
+        <div class="victorian-card border-2 border-emerald-500/70 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center sm:text-left sm:flex items-center justify-between">
+          <div>
+            <div class="text-[11px] sm:text-sm font-bold text-emerald-300">มัธยฐาน (Median)</div>
+            <div class="hidden sm:block text-xs text-parchment-300 mt-0.5">ทนทานต่อค่าผิดปกติ</div>
+          </div>
+          <div class="sm:text-right mt-1 sm:mt-0">
+            <div id="lab-median-val" class="font-display text-2xl sm:text-4xl font-bold text-emerald-400">0.0</div>
+            <div class="text-[10px] sm:text-xs text-parchment-300"><span id="lab-count-val">0</span> จุด</div>
+          </div>
+        </div>
+
+        <div class="victorian-card border-2 border-brass-400/70 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center sm:text-left sm:flex items-center justify-between">
+          <div>
+            <div class="text-[11px] sm:text-sm font-bold text-brass-300">ฐานนิยม (Mode)</div>
+            <div class="hidden sm:block text-xs text-parchment-300 mt-0.5">ค่าที่ซ้ำมากที่สุด</div>
+          </div>
+          <div class="sm:text-right mt-1 sm:mt-0">
+            <div id="lab-mode-val" class="font-display text-lg sm:text-3xl font-bold text-brass-300 truncate">-</div>
+            <div id="lab-unit-label" class="text-[10px] sm:text-xs text-parchment-300">พันวิว</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- พื้นที่กราฟแผนภาพจุดลากได้ -->
+      <div class="victorian-card rounded-3xl p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 id="lab-chart-title" class="font-display text-base sm:text-xl font-bold text-parchment-50">
+              📈 แผนภาพจุดมีชีวิต: ยอดวิวคลิป TikTok (หน่วย: พันวิว)
+            </h3>
+            <p class="text-[11px] sm:text-xs text-parchment-300">แตะค้างที่จุดกลมแล้วลากซ้าย-ขวา (0 - 100) หรือกดปุ่มเพิ่ม Outlier ด้านขวา</p>
+          </div>
+
+          <!-- ปุ่มควบคุมขนาดกดง่ายบนมือถือ -->
+          <div class="grid grid-cols-2 sm:flex flex-wrap gap-1.5 sm:gap-2">
+            <button onclick="addSandboxPoint(96)" class="btn-holmes min-h-[40px] bg-crimson-800/80 hover:bg-crimson-700 text-parchment-100 border border-rose-400/50 px-3 py-1.5 rounded-xl text-xs font-bold">
+              🚀 +Outlier สูง (96)
+            </button>
+            <button onclick="addSandboxPoint(3)" class="btn-holmes min-h-[40px] bg-baker-700 hover:bg-baker-600 text-brass-300 border border-brass-400/50 px-3 py-1.5 rounded-xl text-xs font-bold">
+              🧊 +Outlier ต่ำ (3)
+            </button>
+            <button onclick="addSandboxRandomPoint()" class="btn-holmes min-h-[40px] bg-baker-800 hover:bg-baker-700 text-parchment-100 border border-brass-500/40 px-3 py-1.5 rounded-xl text-xs font-bold">
+              ➕ เพิ่มจุดสุ่ม
+            </button>
+            <button onclick="resetSandboxCurrent()" class="btn-holmes min-h-[40px] bg-baker-950 hover:bg-baker-800 text-parchment-300 border border-brass-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">
+              🔄 รีเซ็ต
+            </button>
+          </div>
+        </div>
+
+        <!-- SVG แผนภาพจุด (ขยาย Hit-area เพื่อนิ้วสัมผัสบนมือถือ) -->
+        <div class="bg-baker-950 border-2 border-brass-500/40 rounded-2xl p-2 sm:p-4 select-none">
+          <svg id="sandbox-svg" viewBox="0 0 800 265" class="w-full h-auto touch-none overflow-visible"></svg>
+        </div>
+
+        <!-- แถบวิเคราะห์ผลอัตโนมัติ -->
+        <div id="lab-insight-banner" class="rounded-2xl p-3.5 sm:p-4 border text-xs sm:text-base flex items-start gap-2.5 leading-relaxed"></div>
+
+        <!-- ภารกิจเก็บคะแนนห้องทดลอง (25 คะแนน) -->
+        <div class="parchment-box rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="font-display text-base sm:text-lg font-bold text-crimson-700 flex items-center gap-1.5">
+              <span>🧪</span> ภารกิจพิสูจน์ทฤษฎีของโฮมส์ (+25 คะแนน)
+            </h4>
+            <span id="lab-mission-badge" class="text-xs font-bold bg-baker-800 text-brass-300 px-3 py-1 rounded-full">
+              ยังไม่ผ่านภารกิจ
+            </span>
+          </div>
+
+          <div class="space-y-2 text-xs sm:text-sm text-baker-900">
+            <div id="lab-step1-status" class="flex items-center gap-2 font-semibold bg-parchment-50/80 border border-brass-600/30 rounded-xl p-2.5">
+              <span>⬜</span>
+              <span>ขั้นที่ 1: ลากจุดหรือกดเพิ่ม Outlier จนค่าเฉลี่ย (Mean) ห่างจากมัธยฐาน (Median) อย่างน้อย <b>10 หน่วย</b></span>
+            </div>
+
+            <div class="bg-parchment-50/90 border border-brass-600/30 rounded-xl p-3 space-y-2.5">
+              <div class="font-bold text-baker-900">
+                ขั้นที่ 2: จากการทดลอง เมื่อชุดข้อมูลมี "ค่าผิดปกติ (Outlier)" โดดสูงหรือต่ำกว่ากลุ่มมาก ค่ากลางใดเหมาะจะใช้เป็นตัวแทนข้อมูลมากที่สุด?
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button type="button" onclick="submitLabQuiz('mean')" class="btn-holmes min-h-[44px] px-3 py-2 rounded-xl bg-white border-2 border-brass-600/50 hover:border-crimson-700 font-bold text-baker-900 text-xs sm:text-sm">
+                  ก. ค่าเฉลี่ยเลขคณิต (Mean)
+                </button>
+                <button type="button" onclick="submitLabQuiz('median')" class="btn-holmes min-h-[44px] px-3 py-2 rounded-xl bg-white border-2 border-brass-600/50 hover:border-crimson-700 font-bold text-baker-900 text-xs sm:text-sm">
+                  ข. มัธยฐาน (Median)
+                </button>
+                <button type="button" onclick="submitLabQuiz('range')" class="btn-holmes min-h-[44px] px-3 py-2 rounded-xl bg-white border-2 border-brass-600/50 hover:border-crimson-700 font-bold text-baker-900 text-xs sm:text-sm">
+                  ค. ค่าสูงสุด (Maximum)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ฮิสโทแกรมคู่ขนาน + ชิปข้อมูล -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div class="lg:col-span-7 bg-baker-950/90 border border-brass-500/30 rounded-2xl p-3.5 sm:p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-display font-bold text-xs sm:text-sm text-brass-300">📊 ฮิสโทแกรมคู่ขนาน</span>
+              <div class="flex items-center gap-1.5 text-xs">
+                <span class="text-parchment-300">กว้างชั้น:</span>
+                <select id="lab-bin-select" onchange="renderSandbox()" class="bg-baker-800 border border-brass-500/40 rounded-lg px-2 py-1 text-parchment-100 font-bold">
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="25">25</option>
+                </select>
+              </div>
+            </div>
+            <div id="lab-histogram" class="h-32 flex items-end justify-around gap-1 pt-4"></div>
+          </div>
+
+          <div class="lg:col-span-5 bg-baker-950/90 border border-brass-500/30 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between">
+            <div>
+              <div class="font-display font-bold text-xs sm:text-sm text-brass-300 mb-2">🔢 ชุดข้อมูลปัจจุบัน (แตะ ✕ เพื่อลบจุด)</div>
+              <div id="lab-data-chips" class="flex flex-wrap gap-1.5"></div>
+            </div>
+            <div class="text-[11px] text-parchment-300 mt-3 pt-2 border-t border-baker-800">
+              💡 บนมือถือสามารถแตะค้างที่จุดสีทองบนกราฟแล้วลากได้เลย หรือใช้ปุ่มเพิ่ม Outlier ด้านบน
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         โมดูลที่ 3: ศึกประชันจัดทัพ E-SPORTS ด้วยสถิติ (MORIARTY STAT CUP)
+         ========================================================================= -->
+    <section id="mod-esports" class="hidden animate-in space-y-4 sm:space-y-5">
+      <!-- หัวข้อและงบประมาณ -->
+      <div class="victorian-card rounded-3xl p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex flex-wrap items-center gap-1.5 bg-brass-600/30 text-brass-300 border border-brass-400/50 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold mb-2">
+            <span>♟️ MORIARTY STAT CUP</span>
+            <span>•</span>
+            <span>วิเคราะห์ฮิสโทแกรม & Mean vs Median (25 คะแนน)</span>
+          </div>
+          <h2 class="font-display text-xl sm:text-3xl font-bold text-parchment-50">
+            ผู้จัดการทีม E-Sports: กระดานหมากสถิติพิชิตมอริอาร์ตี
+          </h2>
+          <p class="text-parchment-300 text-xs sm:text-base mt-1">
+            เลือกยอดฝีมือ <b>3 คน</b> ภายใต้งบ <b>1,000 ปอนด์ทอง</b> ระวังกับดักผู้เล่นที่ <b>ค่าเฉลี่ยสูงเพราะฟลุ๊คแค่นัดเดียว!</b>
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 shrink-0">
+          <div class="bg-baker-950 border border-brass-400/60 rounded-2xl px-3.5 py-2.5 text-center">
+            <div class="text-[11px] text-brass-300 font-bold">งบคงเหลือ</div>
+            <div id="esp-budget" class="font-display text-xl sm:text-2xl font-bold text-parchment-50">1,000 🪙</div>
+          </div>
+          <div class="bg-baker-950 border border-brass-400/60 rounded-2xl px-3.5 py-2.5 text-center">
+            <div class="text-[11px] text-emerald-300 font-bold">สมาชิกในทีม</div>
+            <div id="esp-count" class="font-display text-xl sm:text-2xl font-bold text-parchment-50">0 / 3 คน</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- โหมดท้าทายและปุ่มส่งแข่ง -->
+      <div class="victorian-card rounded-2xl p-3.5 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <label class="inline-flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-parchment-100 font-medium">
+          <input id="esp-hide-median" type="checkbox" onchange="renderEsportsRoster()" class="w-5 h-5 rounded accent-amber-500 shrink-0">
+          <span>🔥 โหมดนักสืบมือโปร: ซ่อนตัวเลข Median (ฝึกวิเคราะห์จากฮิสโทแกรมเอง!)</span>
+        </label>
+
+        <div class="flex items-center gap-2">
+          <button onclick="resetEsportsTeam()" class="btn-holmes min-h-[42px] bg-baker-700 hover:bg-baker-600 border border-brass-500/40 text-parchment-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold">
+            🔄 ล้างทีม
+          </button>
+          <button id="btn-start-tourney" onclick="startTournament()" disabled
+            class="btn-holmes btn-wax flex-1 sm:flex-none min-h-[42px] px-5 py-2 rounded-xl text-xs sm:text-sm font-bold">
+            🏆 แข่งทัวร์นาเมนต์ (5 นัด)
+          </button>
+        </div>
+      </div>
+
+      <!-- การ์ดผู้เล่นทั้ง 6 คน -->
+      <div id="esp-roster-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- ผลการแข่งขันทัวร์นาเมนต์จำลอง -->
+      <div id="esp-tourney-panel" class="hidden victorian-card border-2 border-brass-400 rounded-3xl p-4 sm:p-7 space-y-4 animate-in">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-brass-500/30 pb-4 text-center sm:text-left">
+          <div>
+            <span class="text-xs font-serif font-bold text-brass-300 uppercase tracking-wider">TOURNAMENT RESULT • BEST OF 5</span>
+            <h3 class="font-display text-xl sm:text-3xl font-bold text-parchment-50">⚔️ ทีม 221B ของคุณ VS ทีม Moriarty AI</h3>
+          </div>
+          <div id="esp-final-score" class="font-display text-3xl sm:text-4xl font-bold bg-baker-950 px-5 py-2 rounded-2xl border border-brass-500/50">
+            0 - 0
+          </div>
+        </div>
+
+        <div id="esp-match-logs" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+        <div id="esp-post-analysis" class="rounded-2xl p-4 border text-xs sm:text-base leading-relaxed"></div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         โมดูลที่ 4: สมุดบันทึกคะแนนนักเรียนของวัตสัน (SCOREBOARD & RECORDS)
+         ========================================================================= -->
+    <section id="mod-scores" class="hidden animate-in space-y-5">
+      <!-- การ์ดสรุปผลคะแนนส่วนตัวของนักเรียน -->
+      <div class="parchment-box rounded-3xl p-5 sm:p-7 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-brass-600/30 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-baker-800 border-2 border-brass-400 flex items-center justify-center text-3xl shrink-0">
+              🎩
+            </div>
+            <div>
+              <span class="font-serif text-[11px] font-bold uppercase tracking-wider text-crimson-700">
+                OFFICIAL DETECTIVE DOSSIER
+              </span>
+              <h2 id="sc-my-name" class="font-display text-2xl sm:text-3xl font-bold text-baker-900 leading-tight">
+                ยังไม่ได้ลงทะเบียนชื่อ
+              </h2>
+              <p id="sc-my-meta" class="text-xs sm:text-sm text-baker-700 font-medium">
+                ชั้น: - • เลขที่: -
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-3">
+            <div class="bg-baker-900 text-parchment-50 border-2 border-brass-400 rounded-2xl px-4 py-2 text-center">
+              <div class="text-[10px] text-brass-300 font-bold">คะแนนสะสมรวม</div>
+              <div class="font-display text-2xl sm:text-3xl font-bold text-brass-300">
+                <span id="sc-my-total">0</span><span class="text-sm text-parchment-300"> / 100</span>
+              </div>
+            </div>
+            <button onclick="openProfileModal()" class="btn-holmes bg-baker-800 text-parchment-50 px-3.5 py-3 rounded-xl text-xs sm:text-sm font-bold border border-brass-500/60">
+              ✏️ แก้ไขชื่อ
+            </button>
+          </div>
+        </div>
+
+        <!-- สถานะทั้ง 4 ภารกิจ -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <div id="sc-card-case1" class="bg-parchment-50 border-2 border-brass-600/30 rounded-2xl p-3 text-center">
+            <div class="text-xl mb-1">📁</div>
+            <div class="text-xs font-bold text-baker-800">คดี #01 แอดมินลับ</div>
+            <div id="sc-val-case1" class="font-display text-lg font-bold text-crimson-700 mt-0.5">0 / 25</div>
+          </div>
+          <div id="sc-card-case2" class="bg-parchment-50 border-2 border-brass-600/30 rounded-2xl p-3 text-center">
+            <div class="text-xl mb-1">🎒</div>
+            <div class="text-xs font-bold text-baker-800">คดี #02 สูตรลับ</div>
+            <div id="sc-val-case2" class="font-display text-lg font-bold text-crimson-700 mt-0.5">0 / 25</div>
+          </div>
+          <div id="sc-card-lab" class="bg-parchment-50 border-2 border-brass-600/30 rounded-2xl p-3 text-center">
+            <div class="text-xl mb-1">⚗️</div>
+            <div class="text-xs font-bold text-baker-800">ห้องแล็บ Outlier</div>
+            <div id="sc-val-lab" class="font-display text-lg font-bold text-crimson-700 mt-0.5">0 / 25</div>
+          </div>
+          <div id="sc-card-esports" class="bg-parchment-50 border-2 border-brass-600/30 rounded-2xl p-3 text-center">
+            <div class="text-xl mb-1">♟️</div>
+            <div class="text-xs font-bold text-baker-800">ศึก E-Sports</div>
+            <div id="sc-val-esports" class="font-display text-lg font-bold text-crimson-700 mt-0.5">0 / 25</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+          <div id="cloud-status-text" class="text-xs font-semibold text-baker-700 flex items-center gap-1.5">
+            <span>⏳</span> กำลังเชื่อมต่อสมุดบันทึกออนไลน์...
+          </div>
+          <button onclick="saveScoreNow(true)" class="btn-holmes btn-wax w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm">
+            💾 บันทึกคะแนนลงสมุดบันทึกเดี๋ยวนี้
+          </button>
+        </div>
+      </div>
+
+      <!-- ตารางคะแนนรวมนักเรียนทั้งหมด (สำหรับคุณครูและนักเรียนดูอันดับ) -->
+      <div class="victorian-card rounded-3xl p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-brass-300 flex items-center gap-2">
+              <span>📜</span> ทำเนียบคะแนนนักสืบทั้งหมด (<span id="sb-total-students">0</span> คน)
+            </h3>
+            <p class="text-xs text-parchment-300">อัปเดตคะแนนอัตโนมัติแบบเรียลไทม์ คุณครูสามารถคัดลอกข้อมูลไปวางใน Excel / Google Sheets ได้ทันที</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="sb-search" type="text" oninput="filterScoreboard()" placeholder="🔍 ค้นหาชื่อ หรือ ห้อง..."
+              class="flex-1 sm:w-48 bg-baker-950 border border-brass-500/50 rounded-xl px-3 py-2 text-xs sm:text-sm text-parchment-50 focus:outline-none focus:border-brass-300" />
+            <button onclick="copyScoreboardCSV()" class="btn-holmes btn-brass px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold">
+              📋 คัดลอก CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- ตารางแบบเลื่อนแนวนอนเฉพาะภายในกล่องตารางบนมือถือ -->
+        <div class="overflow-x-auto rounded-2xl border border-brass-500/35">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-[540px]">
+            <thead>
+              <tr class="bg-baker-950 text-brass-300 font-display">
+                <th class="p-3 border-b border-brass-500/30 text-center w-12">#</th>
+                <th class="p-3 border-b border-brass-500/30">ชื่อ-นามสกุล</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">ชั้น/เลขที่</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">คดี 1</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">คดี 2</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">แล็บ</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">E-Sports</th>
+                <th class="p-3 border-b border-brass-500/30 text-center">รวม (100)</th>
+              </tr>
+            </thead>
+            <tbody id="sb-table-body" class="divide-y divide-brass-500/20 bg-baker-900/60">
+              <tr>
+                <td colspan="8" class="p-6 text-center text-parchment-300">ยังไม่มีข้อมูลบันทึกคะแนนในระบบ ลองลงทะเบียนชื่อและเริ่มไขคดีแรกกันเลย!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== ส่วนท้ายหน้าเว็บ ==================== -->
+  <footer class="text-center py-4 px-4 text-[11px] sm:text-xs text-parchment-300/60 border-t border-brass-500/20 mt-4">
+    221B Stat Holmes • สื่อการเรียนรู้สถิติระดับชั้น ม.2 (แผนภาพต้น-ใบ • แผนภาพจุด • ฮิสโทแกรม • ค่ากลางของข้อมูล)
+  </footer>
+
+  <!-- ==================== สคริปต์ระบบเกม & ฐานข้อมูลออนไลน์ (FIREBASE MODULE) ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* =========================================================================
+       0. ระบบฐานข้อมูลออนไลน์ (Cloud Score Storage) + สถานะนักเรียน
+       ========================================================================= */
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'stat-holmes-m2';
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let cloudReady = false;
+    let allScoreRecords = [];
+
+    const StudentState = {
+      docId: null,
+      name: '',
+      className: 'ม.2/1',
+      number: '',
+      scores: {
+        case1: 0,
+        case2: 0,
+        lab: 0,
+        esports: 0
+      },
+      labOutlierAchieved: false
+    };
+
+    function getTotalScore() {
+      const s = StudentState.scores;
+      return s.case1 + s.case2 + s.lab + s.esports;
+    }
+
+    async function initCloudStorage() {
+      const statusEl = document.getElementById('cloud-status-text');
+      try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+          throw new Error('Standalone preview mode');
+        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        // RULE 3: ยืนยันตัวตนก่อนดำเนินการกับฐานข้อมูลเสมอ
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          const cred = await signInWithCustomToken(auth, __initial_auth_token);
+          currentUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(auth);
+          currentUser = cred.user;
+        }
+
+        if (!currentUser) throw new Error('Auth unavailable');
+
+        StudentState.docId = currentUser.uid;
+        cloudReady = true;
+        statusEl.innerHTML = '<span class="text-emerald-700 font-bold">🟢 เชื่อมต่อสมุดบันทึกคะแนนออนไลน์เรียบร้อย (บันทึกอัตโนมัติ)</span>';
+
+        // RULE 1 & RULE 2: ใช้ strict path และดึงข้อมูลแบบ simple collection query แล้วเรียงในหน่วยความจำ JS
+        const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'student_scores');
+        onSnapshot(
+          colRef,
+          (snapshot) => {
+            const list = [];
+            snapshot.forEach((d) => {
+              const data = d.data();
+              list.push({ id: d.id, ...data });
+              // หากเป็นเรคคอร์ดของนักเรียนคนนี้เอง และยังไม่ได้กรอกชื่อใหม่ ให้โหลดข้อมูลเดิมกลับมา
+              if (d.id === StudentState.docId && !StudentState.name && data.name) {
+                StudentState.name = data.name;
+                StudentState.className = data.className || 'ม.2/1';
+                StudentState.number = data.number || '';
+                StudentState.scores = {
+                  case1: Math.max(StudentState.scores.case1, Number(data.case1) || 0),
+                  case2: Math.max(StudentState.scores.case2, Number(data.case2) || 0),
+                  lab: Math.max(StudentState.scores.lab, Number(data.lab) || 0),
+                  esports: Math.max(StudentState.scores.esports, Number(data.esports) || 0)
+                };
+                updateStudentUI();
+              }
+            });
+            allScoreRecords = list;
+            renderScoreboard();
+          },
+          (error) => {
+            console.error('Scoreboard snapshot error:', error);
+            statusEl.innerHTML = '<span class="text-amber-800">🟡 เชื่อมต่อแบบออฟไลน์ชั่วคราว (เก็บคะแนนในรอบปัจจุบัน)</span>';
+          }
+        );
+      } catch (err) {
+        // โหมดสำรองในหน่วยความจำหากเปิดไฟล์นอกแพลตฟอร์ม
+        StudentState.docId = 'session-' + Math.random().toString(36).slice(2, 10);
+        cloudReady = false;
+        statusEl.innerHTML = '<span class="text-amber-800">🟡 โหมดบันทึกในรอบการเล่นปัจจุบัน (พร้อมใช้งาน)</span>';
+      }
+    }
+
+    async function saveScoreNow(showFeedback = false) {
+      if (!StudentState.name) {
+        if (showFeedback) {
+          showToast('กรุณากรอกชื่อ-นามสกุลนักเรียนก่อนบันทึกคะแนนนะ!', 'info');
+          openProfileModal();
+        }
+        return;
+      }
+
+      const payload = {
+        name: StudentState.name,
+        className: StudentState.className || '-',
+        number: StudentState.number || '-',
+        case1: StudentState.scores.case1,
+        case2: StudentState.scores.case2,
+        lab: StudentState.scores.lab,
+        esports: StudentState.scores.esports,
+        totalScore: getTotalScore(),
+        updatedAt: Date.now()
+      };
+
+      // อัปเดตในรายการในหน่วยความจำทันที
+      const idx = allScoreRecords.findIndex(r => r.id === StudentState.docId);
+      if (idx >= 0) {
+        allScoreRecords[idx] = { id: StudentState.docId, ...payload };
+      } else {
+        allScoreRecords.push({ id: StudentState.docId, ...payload });
+      }
+      renderScoreboard();
+
+      // บันทึกลงฐานข้อมูลออนไลน์หากพร้อมใช้งาน
+      if (cloudReady && db && currentUser) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_scores', StudentState.docId);
+          await setDoc(docRef, payload, { merge: true });
+          if (showFeedback) {
+            SoundFX.success();
+            showToast(`บันทึกคะแนนของ "${StudentState.name}" (${payload.totalScore}/100) เรียบร้อย! 📜`, 'success');
+          }
+        } catch (e) {
+          console.error('Save score error:', e);
+          if (showFeedback) showToast('บันทึกในรอบนี้แล้ว แต่เชื่อมต่อระบบคลาวด์ไม่สำเร็จ', 'error');
+        }
+      } else if (showFeedback) {
+        SoundFX.success();
+        showToast(`บันทึกคะแนนของ "${StudentState.name}" (${payload.totalScore}/100) ลงตารางแล้ว! 📜`, 'success');
+      }
+    }
+
+    function openProfileModal() {
+      SoundFX.click();
+      document.getElementById('inp-student-name').value = StudentState.name;
+      document.getElementById('inp-student-class').value = StudentState.className || 'ม.2/1';
+      document.getElementById('inp-student-no').value = StudentState.number;
+      document.getElementById('profile-modal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      SoundFX.click();
+      document.getElementById('profile-modal').classList.add('hidden');
+    }
+
+    function saveStudentProfile(evt) {
+      evt.preventDefault();
+      const nameVal = document.getElementById('inp-student-name').value.trim();
+      if (!nameVal) {
+        showToast('กรุณากรอกชื่อนักเรียนก่อนนะ!', 'error');
+        return;
+      }
+      StudentState.name = nameVal;
+      StudentState.className = document.getElementById('inp-student-class').value.trim() || 'ม.2';
+      StudentState.number = document.getElementById('inp-student-no').value.trim() || '-';
+
+      SoundFX.success();
+      document.getElementById('profile-modal').classList.add('hidden');
+      updateStudentUI();
+      saveScoreNow(false);
+      showToast(`ยินดีต้อนรับนักสืบ "${StudentState.name}" สู่ 221B Baker Street! 🕵️‍♂️`, 'success');
+    }
+
+    function updateStudentUI() {
+      const total = getTotalScore();
+      const s = StudentState.scores;
+
+      document.getElementById('hdr-student-name').textContent = StudentState.name || 'แตะเพื่อลงชื่อ';
+      document.getElementById('hdr-total-score').textContent = total;
+
+      document.getElementById('sc-my-name').textContent = StudentState.name || 'ยังไม่ได้ลงทะเบียนชื่อ';
+      document.getElementById('sc-my-meta').textContent = `ชั้น: ${StudentState.className || '-'} • เลขที่: ${StudentState.number || '-'}`;
+      document.getElementById('sc-my-total').textContent = total;
+
+      document.getElementById('sc-val-case1').textContent = `${s.case1} / 25`;
+      document.getElementById('sc-val-case2').textContent = `${s.case2} / 25`;
+      document.getElementById('sc-val-lab').textContent = `${s.lab} / 25`;
+      document.getElementById('sc-val-esports').textContent = `${s.esports} / 25`;
+
+      document.getElementById('badge-case-0').textContent = s.case1 > 0 ? '✓' : '';
+      document.getElementById('badge-case-1').textContent = s.case2 > 0 ? '✓' : '';
+
+      // เปลี่ยนสีกรอบการ์ดภารกิจที่ผ่านแล้ว
+      ['case1', 'case2', 'lab', 'esports'].forEach(key => {
+        const card = document.getElementById(`sc-card-${key}`);
+        const valEl = document.getElementById(`sc-val-${key}`);
+        if (s[key] > 0) {
+          card.className = 'bg-emerald-50 border-2 border-emerald-600 rounded-2xl p-3 text-center';
+          valEl.className = 'font-display text-lg font-bold text-emerald-700 mt-0.5';
+        }
+      });
+
+      if (s.lab > 0) {
+        const badge = document.getElementById('lab-mission-badge');
+        badge.textContent = '✓ ผ่านภารกิจ (+25 คะแนน)';
+        badge.className = 'text-xs font-bold bg-emerald-700 text-parchment-50 px-3 py-1 rounded-full';
+      }
+    }
+
+    function renderScoreboard() {
+      const q = (document.getElementById('sb-search')?.value || '').trim().toLowerCase();
+      // เรียงลำดับในหน่วยความจำ JS (ตามกฎ Firestore Rule 2)
+      const sorted = [...allScoreRecords]
+        .filter(r => {
+          if (!q) return true;
+          return (r.name || '').toLowerCase().includes(q) || (r.className || '').toLowerCase().includes(q);
+        })
+        .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0) || (b.updatedAt || 0) - (a.updatedAt || 0));
+
+      document.getElementById('sb-total-students').textContent = allScoreRecords.length;
+      const tbody = document.getElementById('sb-table-body');
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="p-6 text-center text-parchment-300">
+              ${q ? 'ไม่พบชื่อนักเรียนที่ค้นหา' : 'ยังไม่มีข้อมูลบันทึกคะแนนในระบบ ลองลงทะเบียนชื่อและเริ่มไขคดีแรกกันเลย!'}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = sorted.map((r, i) => {
+        const isMe = r.id === StudentState.docId;
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+        return `
+          <tr class="${isMe ? 'bg-brass-500/20 font-bold' : 'hover:bg-baker-800/70'}">
+            <td class="p-3 text-center">${medal}</td>
+            <td class="p-3 text-parchment-50">
+              ${escapeHTML(r.name || 'ไม่ระบุชื่อ')}
+              ${isMe ? '<span class="ml-1 text-[10px] bg-crimson-700 text-parchment-50 px-1.5 py-0.5 rounded-md">คุณ</span>' : ''}
+            </td>
+            <td class="p-3 text-center text-parchment-200">${escapeHTML(r.className || '-')} / ${escapeHTML(String(r.number || '-'))}</td>
+            <td class="p-3 text-center ${r.case1 > 0 ? 'text-emerald-300 font-bold' : 'text-parchment-300/60'}">${r.case1 || 0}</td>
+            <td class="p-3 text-center ${r.case2 > 0 ? 'text-emerald-300 font-bold' : 'text-parchment-300/60'}">${r.case2 || 0}</td>
+            <td class="p-3 text-center ${r.lab > 0 ? 'text-emerald-300 font-bold' : 'text-parchment-300/60'}">${r.lab || 0}</td>
+            <td class="p-3 text-center ${r.esports > 0 ? 'text-emerald-300 font-bold' : 'text-parchment-300/60'}">${r.esports || 0}</td>
+            <td class="p-3 text-center font-display text-base font-bold text-brass-300">${r.totalScore || 0}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterScoreboard() {
+      renderScoreboard();
+    }
+
+    function copyScoreboardCSV() {
+      if (allScoreRecords.length === 0) {
+        showToast('ยังไม่มีข้อมูลคะแนนสำหรับคัดลอก', 'info');
+        return;
+      }
+      const sorted = [...allScoreRecords].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+      const header = 'อันดับ,ชื่อ-นามสกุล,ชั้น/ห้อง,เลขที่,คดีที่1,คดีที่2,ห้องแล็บOutlier,ศึกE-Sports,คะแนนรวม';
+      const rows = sorted.map((r, i) =>
+        `${i + 1},"${(r.name || '').replace(/"/g, '""')}","${r.className || '-'}","${r.number || '-'}",${r.case1 || 0},${r.case2 || 0},${r.lab || 0},${r.esports || 0},${r.totalScore || 0}`
+      );
+      const csvText = [header, ...rows].join('\n');
+
+      // ใช้ document.execCommand('copy') เพื่อรองรับสภาพแวดล้อม iFrame
+      const ta = document.createElement('textarea');
+      ta.value = csvText;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        SoundFX.success();
+        showToast('คัดลอกตารางคะแนน (CSV) เรียบร้อย! นำไปวางใน Excel / Google Sheets ได้เลย 📋', 'success');
+      } catch (e) {
+        showToast('ไม่สามารถคัดลอกอัตโนมัติได้', 'error');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    /* =========================================================================
+       1. ยูทิลิตี้: ระบบเสียง Toast และฟังก์ชันคำนวณสถิติ ม.2
+       ========================================================================= */
+    const SoundFX = {
+      enabled: true,
+      ctx: null,
+      play(freq, type = 'sine', duration = 0.1, delay = 0, vol = 0.07) {
+        if (!this.enabled) return;
+        try {
+          if (!this.ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) this.ctx = new AC();
+          }
+          if (!this.ctx) return;
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + duration);
+        } catch (e) {}
+      },
+      click() { this.play(520, 'triangle', 0.06); },
+      tick()  { this.play(700, 'sine', 0.025, 0, 0.035); },
+      success() {
+        this.play(523.25, 'triangle', 0.12, 0);
+        this.play(659.25, 'triangle', 0.12, 0.09);
+        this.play(783.99, 'triangle', 0.22, 0.18);
+      },
+      error() {
+        this.play(210, 'sawtooth', 0.14, 0);
+        this.play(165, 'sawtooth', 0.18, 0.12);
+      }
+    };
+
+    function toggleSound() {
+      SoundFX.enabled = !SoundFX.enabled;
+      document.getElementById('btn-sound').textContent = SoundFX.enabled ? '🔊' : '🔇';
+      if (SoundFX.enabled) SoundFX.click();
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const div = document.createElement('div');
+      const palette = {
+        success: 'bg-forest-600 text-parchment-50 border-emerald-400',
+        error:   'bg-crimson-700 text-parchment-50 border-brass-300',
+        info:    'bg-baker-800 text-brass-300 border-brass-400'
+      };
+      div.className = `${palette[type] || palette.info} border-2 px-4 py-2.5 rounded-2xl shadow-2xl font-bold text-xs sm:text-sm text-center animate-in`;
+      div.textContent = msg;
+      container.appendChild(div);
+      setTimeout(() => {
+        div.style.opacity = '0';
+        div.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => div.remove(), 260);
+      }, 2800);
+    }
+
+    function calcStats(arr) {
+      if (!arr || arr.length === 0) return { mean: 0, median: 0, modeText: '-', modes: [], sorted: [] };
+      const sorted = [...arr].sort((a, b) => a - b);
+      const n = sorted.length;
+      const sum = sorted.reduce((acc, v) => acc + v, 0);
+      const mean = sum / n;
+      const median = n % 2 === 1 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+
+      const freq = {};
+      let maxFreq = 0;
+      sorted.forEach(v => {
+        freq[v] = (freq[v] || 0) + 1;
+        if (freq[v] > maxFreq) maxFreq = freq[v];
+      });
+      let modes = [];
+      let modeText = 'ไม่มีฐานนิยม';
+      if (maxFreq > 1) {
+        modes = Object.keys(freq).filter(k => freq[k] === maxFreq).map(Number);
+        if (modes.length <= 2) {
+          modeText = modes.join(', ');
+        } else {
+          modes = [];
+          modeText = 'ไม่มีฐานนิยม';
+        }
+      }
+      return { mean, median, modeText, modes, sorted };
+    }
+
+    function switchModule(modId) {
+      SoundFX.click();
+      ['detective', 'sandbox', 'esports', 'scores'].forEach(id => {
+        document.getElementById(`mod-${id}`).classList.add('hidden');
+        const tab = document.getElementById(`tab-${id}`);
+        tab.className = 'nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-baker-800 text-parchment-200 border border-brass-500/35 hover:bg-baker-700';
+      });
+      document.getElementById(`mod-${modId}`).classList.remove('hidden');
+      const activeTab = document.getElementById(`tab-${modId}`);
+      activeTab.className = 'nav-tab btn-holmes min-h-[42px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 btn-brass';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (modId === 'sandbox') renderSandbox();
+      if (modId === 'scores') renderScoreboard();
+    }
+
+    /* =========================================================================
+       2. โมดูลที่ 1: แฟ้มคดีนักสืบข้อมูล (THE BAKER STREET CASE FILES)
+       ========================================================================= */
+    const DetectiveCases = [
+      {
+        scoreKey: 'case1',
+        title: 'แฟ้มคดี #01: ตามหาตัวจริงแอดมินเพจลับโรงเรียน',
+        desc: 'พบหลักฐาน "ระยะเวลาเชื่อมต่อ Wi-Fi หลังเลิกเรียน" ของผู้ต้องสงสัย 7 คน จงสร้างแผนภาพต้น-ใบเพื่อไขปริศนาและจับตัวแอดมิน!',
+        unit: 'นาที',
+        stems: [2, 3, 4, 8],
+        suspects: [
+          { id: 's1', name: 'ต้นน้ำ', avatar: '🧑‍💻', val: 42 },
+          { id: 's2', name: 'บอส',   avatar: '😎',   val: 85 },
+          { id: 's3', name: 'เฟรม',  avatar: '🧢',   val: 24 },
+          { id: 's4', name: 'คิว',   avatar: '🤓',   val: 38 },
+          { id: 's5', name: 'มายด์', avatar: '🎀',   val: 35 },
+          { id: 's6', name: 'ปาล์ม', avatar: '🎧',   val: 46 },
+          { id: 's7', name: 'พลอย',  avatar: '🌸',   val: 31 }
+        ],
+        clues: [
+          '📌 <b>หลักฐาน #1:</b> มีผู้ต้องสงสัยคนหนึ่งโหลดไฟล์เกมทิ้งไว้จนเวลานานผิดปกติ <b>(Outlier = 85 นาที)</b> แต่วัตสันยืนยันแล้วว่า <u>ไม่ใช่</u> แอดมินเพจลับ!',
+          '📌 <b>หลักฐาน #2:</b> เวลาออนไลน์ของแอดมินตัวจริงอยู่ที่ตำแหน่ง <b>"มัธยฐาน (Median)"</b> ของข้อมูลทั้ง 7 คนพอดี!'
+        ],
+        culpritId: 's4',
+        explanation: 'เมื่อเรียงข้อมูลจากแผนภาพต้น-ใบจะได้ 24, 31, 35, [38], 42, 46, 85 มัธยฐาน (ลำดับที่ 4) คือ 38 นาที ตรงกับ "คิว" ส่วน "บอส (85)" เป็นค่าผิดปกติ (Outlier) ที่ดึงค่าเฉลี่ยให้สูงเกินจริง!'
+      },
+      {
+        scoreKey: 'case2',
+        title: 'แฟ้มคดี #02: คดีขโมยสูตรลับน้ำจิ้มลูกชิ้นโรงอาหาร',
+        desc: 'เครื่องชั่งหน้าประตูบันทึก "น้ำหนักกระเป๋าเป้ (หน่วย: ขีด)" ของผู้ต้องสงสัย 7 คน จงสร้างแผนภาพต้น-ใบเพื่อหาผู้แอบซ่อนหม้อสูตรลับ!',
+        unit: 'ขีด (10 ขีด = 1 กก.)',
+        stems: [2, 3, 6],
+        suspects: [
+          { id: 'c1', name: 'แบงค์',   avatar: '🏀', val: 25 },
+          { id: 'c2', name: 'เจน',     avatar: '📚', val: 31 },
+          { id: 'c3', name: 'มิกซ์',   avatar: '🎒', val: 68 },
+          { id: 'c4', name: 'น้ำหวาน', avatar: '🧋', val: 22 },
+          { id: 'c5', name: 'กาย',     avatar: '🎸', val: 34 },
+          { id: 'c6', name: 'ไอซ์',    avatar: '🕶️', val: 25 },
+          { id: 'c7', name: 'โอม',     avatar: '⚽', val: 28 }
+        ],
+        clues: [
+          '📌 <b>หลักฐาน #1:</b> นักเรียนทั่วไปมีน้ำหนักกระเป๋าใกล้เคียงกับ <b>ฐานนิยม (25 ขีด)</b> และ <b>มัธยฐาน (28 ขีด)</b>',
+          '📌 <b>หลักฐาน #2:</b> คนร้ายแอบซ่อนขวดซอสและสมุดสูตรลับไว้ในกระเป๋า จนมีน้ำหนักโดดสูงเป็น <b>ค่าผิดปกติ (Outlier)</b> ฉีกห่างจากกลุ่มชัดเจน!'
+        ],
+        culpritId: 'c3',
+        explanation: 'ข้อมูลส่วนใหญ่กระจุกอยู่ที่ 22-34 ขีด (มัธยฐาน = 28, ฐานนิยม = 25) แต่ "มิกซ์" มีน้ำหนักกระเป๋าสูงถึง 68 ขีด (6.8 กก.) ซึ่งเป็นค่าผิดปกติ (Outlier) อย่างชัดเจน!'
+      }
+    ];
+
+    const DetectiveState = {
+      caseIdx: 0,
+      selectedSuspectId: null,
+      placedIds: new Set()
+    };
+
+    function loadDetectiveCase(idx) {
+      SoundFX.click();
+      DetectiveState.caseIdx = idx;
+      DetectiveState.selectedSuspectId = null;
+      DetectiveState.placedIds.clear();
+
+      document.getElementById('btn-case-0').className = idx === 0
+        ? 'btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold btn-brass'
+        : 'btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/40';
+      document.getElementById('btn-case-1').className = idx === 1
+        ? 'btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold btn-brass'
+        : 'btn-holmes min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/40';
+
+      const c = DetectiveCases[idx];
+      document.getElementById('det-case-title').textContent = c.title;
+      document.getElementById('det-case-desc').textContent = c.desc;
+      document.getElementById('det-data-unit').textContent = `หน่วย: ${c.unit}`;
+      document.getElementById('det-result-box').classList.add('hidden');
+      document.getElementById('det-stats-summary').classList.add('hidden');
+
+      const sel = document.getElementById('det-suspect-select');
+      sel.innerHTML = '<option value="">-- เลือกผู้ต้องสงสัย --</option>';
+      c.suspects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.avatar} ${s.name} (ค่าข้อมูล: ${s.val})`;
+        sel.appendChild(opt);
+      });
+
+      renderDetectiveUI();
+    }
+
+    function renderDetectiveUI() {
+      const c = DetectiveCases[DetectiveState.caseIdx];
+
+      // 1. การ์ดข้อมูลดิบ
+      const rawBox = document.getElementById('det-raw-cards');
+      rawBox.innerHTML = '';
+      c.suspects.forEach(s => {
+        const isPlaced = DetectiveState.placedIds.has(s.id);
+        const isSelected = DetectiveState.selectedSuspectId === s.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = isPlaced;
+        btn.onclick = () => selectSuspectCard(s.id);
+        btn.className = isPlaced
+          ? 'p-2.5 rounded-2xl border border-emerald-500/40 bg-forest-600/25 text-center opacity-55 cursor-default'
+          : isSelected
+            ? 'btn-holmes p-2.5 rounded-2xl border-2 border-brass-300 bg-brass-500/25 text-center shadow-lg scale-[1.03]'
+            : 'btn-holmes p-2.5 rounded-2xl border border-brass-500/35 bg-baker-950/90 hover:border-brass-300 text-center';
+        btn.innerHTML = `
+          <div class="text-2xl">${s.avatar}</div>
+          <div class="text-xs font-bold text-parchment-100 mt-0.5 truncate">${s.name}</div>
+          <div class="font-display text-base sm:text-lg font-bold ${isPlaced ? 'text-emerald-400' : 'text-brass-300'}">${s.val} ${isPlaced ? '✓' : ''}</div>
+        `;
+        rawBox.appendChild(btn);
+      });
+
+      // แถบแจ้งสถานะการ์ดที่เลือก (สะดวกมากสำหรับหน้าจอมือถือ)
+      const selBanner = document.getElementById('det-selected-banner');
+      if (DetectiveState.selectedSuspectId) {
+        const chosen = c.suspects.find(s => s.id === DetectiveState.selectedSuspectId);
+        selBanner.className = 'mb-3 px-3.5 py-2.5 rounded-xl bg-crimson-800/90 border-2 border-brass-300 text-xs sm:text-sm text-parchment-50 font-bold flex items-center justify-between animate-in';
+        selBanner.innerHTML = `
+          <span>🔎 กำลังถือหลักฐาน: ${chosen.avatar} ${chosen.name} = <span class="text-brass-300 text-base">${chosen.val}</span></span>
+          <span class="text-[11px] bg-baker-950/70 px-2 py-0.5 rounded-lg">แตะแถวต้นเพื่อวาง</span>
+        `;
+      } else if (DetectiveState.placedIds.size === c.suspects.length) {
+        selBanner.className = 'mb-3 px-3.5 py-2 rounded-xl bg-forest-600/40 border border-emerald-400/50 text-xs sm:text-sm text-emerald-200 font-bold';
+        selBanner.innerHTML = '✅ วางแผนภาพต้น-ใบครบทั้ง 7 คนแล้ว! อ่านบันทึกเบาะแสแล้วชี้ตัวคนร้ายได้เลย';
+      } else {
+        selBanner.className = 'mb-3 px-3.5 py-2 rounded-xl bg-baker-950/90 border border-brass-500/40 text-xs sm:text-sm text-parchment-200';
+        selBanner.innerHTML = '👆 แตะเลือกการ์ดผู้ต้องสงสัยด้านบน 1 ใบ แล้วแตะที่แถว "ต้น (หลักสิบ)" ด้านล่าง';
+      }
+
+      // 2. ตารางแผนภาพต้น-ใบ
+      const stemBox = document.getElementById('det-stem-rows');
+      stemBox.innerHTML = '';
+      c.stems.forEach(stem => {
+        const leaves = c.suspects
+          .filter(s => DetectiveState.placedIds.has(s.id) && Math.floor(s.val / 10) === stem)
+          .sort((a, b) => a.val - b.val);
+
+        const row = document.createElement('div');
+        row.onclick = () => placeIntoStem(stem);
+        row.className = 'grid grid-cols-12 items-center active:bg-parchment-200 hover:bg-parchment-200/70 cursor-pointer transition-colors min-h-[54px]';
+        row.innerHTML = `
+          <div class="col-span-3 p-3 text-center border-r-2 border-brass-600/40 font-serif text-xl sm:text-2xl font-bold text-crimson-700">
+            ${stem}
+          </div>
+          <div class="col-span-9 p-2.5 sm:p-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
+            ${leaves.length === 0
+              ? '<span class="text-xs text-baker-600 italic">แตะแถวนี้เพื่อวางหลักหน่วย...</span>'
+              : leaves.map(s => `
+                  <span class="inline-flex items-center gap-1 bg-baker-800 border border-brass-500 text-parchment-50 px-2.5 py-1 rounded-lg font-display font-bold text-sm sm:text-base animate-in">
+                    <span class="text-brass-300">${s.val % 10}</span>
+                    <span class="text-[10px] font-sans text-parchment-200">(${s.name})</span>
+                  </span>
+                `).join('')}
+          </div>
+        `;
+        stemBox.appendChild(row);
+      });
+
+      // 3. ปลดล็อกเบาะแสและค่ากลาง
+      const allPlaced = DetectiveState.placedIds.size === c.suspects.length;
+      const cluesBox = document.getElementById('det-clues-list');
+      const clueStatus = document.getElementById('det-clue-status');
+
+      if (allPlaced) {
+        clueStatus.textContent = '🔓 ปลดล็อกครบ!';
+        clueStatus.className = 'text-[11px] font-bold bg-forest-600 text-parchment-50 px-2.5 py-1 rounded-full';
+        cluesBox.innerHTML = c.clues.map(cl => `<div class="bg-parchment-50/90 border border-brass-600/35 p-3 rounded-xl leading-relaxed">${cl}</div>`).join('');
+
+        const stats = calcStats(c.suspects.map(s => s.val));
+        document.getElementById('det-stat-mean').textContent = stats.mean.toFixed(1);
+        document.getElementById('det-stat-median').textContent = stats.median;
+        document.getElementById('det-stat-mode').textContent = stats.modeText;
+        document.getElementById('det-stats-summary').classList.remove('hidden');
+      } else {
+        clueStatus.textContent = `วางแล้ว ${DetectiveState.placedIds.size}/${c.suspects.length}`;
+        clueStatus.className = 'text-[11px] font-bold bg-baker-800 text-brass-300 px-2.5 py-1 rounded-full';
+        cluesBox.innerHTML = `
+          <div class="bg-parchment-50/80 border border-brass-600/35 p-3 rounded-xl text-baker-800">
+            🔒 วางหลักฐานลงใน <b>แผนภาพต้น-ใบ</b> ให้ครบทั้ง 7 คน เพื่อเปิดซองเบาะแสและคำนวณค่ากลางอัตโนมัติ!
+          </div>
+        `;
+      }
+
+      renderDetectiveHistogram();
+    }
+
+    function selectSuspectCard(id) {
+      SoundFX.click();
+      DetectiveState.selectedSuspectId = id;
+      renderDetectiveUI();
+    }
+
+    function placeIntoStem(stem) {
+      const c = DetectiveCases[DetectiveState.caseIdx];
+      if (!DetectiveState.selectedSuspectId) {
+        showToast('แตะเลือกการ์ดผู้ต้องสงสัยด้านบนก่อน แล้วค่อยแตะแถวต้นนะ!', 'info');
+        return;
+      }
+      const suspect = c.suspects.find(s => s.id === DetectiveState.selectedSuspectId);
+      const correctStem = Math.floor(suspect.val / 10);
+
+      if (correctStem === stem) {
+        SoundFX.success();
+        DetectiveState.placedIds.add(suspect.id);
+        DetectiveState.selectedSuspectId = null;
+        showToast(`ถูกต้อง! ${suspect.val} อยู่ที่ ต้น ${stem} | ใบ ${suspect.val % 10}`, 'success');
+        renderDetectiveUI();
+      } else {
+        SoundFX.error();
+        showToast(`เอ๊ะ! ${suspect.val} มีหลักสิบเป็นเลข ${correctStem} ไม่ใช่แถวต้น ${stem} ลองใหม่นะ!`, 'error');
+      }
+    }
+
+    function autoFillStemLeaf() {
+      SoundFX.success();
+      const c = DetectiveCases[DetectiveState.caseIdx];
+      c.suspects.forEach(s => DetectiveState.placedIds.add(s.id));
+      DetectiveState.selectedSuspectId = null;
+      showToast('วัตสันช่วยเรียงแผนภาพต้น-ใบและเปิดซองเบาะแสให้แล้ว!', 'success');
+      renderDetectiveUI();
+    }
+
+    function resetDetectivePlot() {
+      SoundFX.click();
+      DetectiveState.placedIds.clear();
+      DetectiveState.selectedSuspectId = null;
+      document.getElementById('det-stats-summary').classList.add('hidden');
+      document.getElementById('det-result-box').classList.add('hidden');
+      renderDetectiveUI();
+    }
+
+    function renderDetectiveHistogram() {
+      const c = DetectiveCases[DetectiveState.caseIdx];
+      const binWidth = parseInt(document.getElementById('det-bin-width').value, 10) || 10;
+      const values = c.suspects.map(s => s.val);
+      const minVal = Math.floor(Math.min(...values) / binWidth) * binWidth;
+      const maxVal = Math.max(...values);
+
+      const bins = [];
+      for (let start = minVal; start <= maxVal; start += binWidth) {
+        const end = start + binWidth - 1;
+        const count = values.filter(v => v >= start && v <= end).length;
+        bins.push({ label: `${start}-${end}`, count });
+      }
+      const maxCount = Math.max(...bins.map(b => b.count), 1);
+
+      document.getElementById('det-histogram').innerHTML = bins.map(b => {
+        const hPct = Math.round((b.count / maxCount) * 100);
+        return `
+          <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0">
+            <div class="text-[11px] font-bold text-brass-300 mb-1">${b.count > 0 ? b.count : ''}</div>
+            <div class="w-full max-w-[40px] rounded-t-md transition-all duration-300 ${b.count > 0 ? 'bg-gradient-to-t from-crimson-700 to-brass-400' : 'bg-baker-800'}" style="height: ${Math.max(hPct, b.count > 0 ? 12 : 3)}%"></div>
+            <div class="text-[9px] sm:text-[10px] text-parchment-300 mt-1.5 font-medium truncate w-full text-center">${b.label}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function submitDetectiveArrest() {
+      const c = DetectiveCases[DetectiveState.caseIdx];
+      const chosen = document.getElementById('det-suspect-select').value;
+      const resBox = document.getElementById('det-result-box');
+
+      if (!chosen) {
+        showToast('กรุณาเลือกผู้ต้องสงสัยก่อนประทับตราออกหมายจับ!', 'info');
+        return;
+      }
+
+      resBox.classList.remove('hidden');
+      if (chosen === c.culpritId) {
+        SoundFX.success();
+        const isFirstSolve = StudentState.scores[c.scoreKey] === 0;
+        StudentState.scores[c.scoreKey] = 25;
+        updateStudentUI();
+        saveScoreNow(false);
+
+        resBox.className = 'rounded-2xl p-4 text-xs sm:text-sm font-medium bg-forest-600/40 border-2 border-emerald-400 text-parchment-50 animate-in';
+        resBox.innerHTML = `
+          <div class="font-display text-base sm:text-lg font-bold text-emerald-300 mb-1">
+            🎉 "Elementary, my dear!" ปิดคดีสำเร็จ! ${isFirstSolve ? '(+25 คะแนน)' : '(ได้รับ 25 คะแนนแล้ว)'}
+          </div>
+          <p>${c.explanation}</p>
+        `;
+        showToast('ยอดเยี่ยมมาก โฮมส์! ปิดคดีสำเร็จ +25 คะแนน 🕵️‍♂️', 'success');
+      } else {
+        SoundFX.error();
+        resBox.className = 'rounded-2xl p-4 text-xs sm:text-sm font-medium bg-crimson-800/60 border-2 border-rose-400 text-parchment-50 animate-in';
+        resBox.innerHTML = `
+          <div class="font-display text-base sm:text-lg font-bold text-rose-300 mb-1">❌ หลักฐานยังไม่ตรงนะนักสืบ!</div>
+          <p>ลองตรวจสอบแผนภาพต้น-ใบ ค่ามัธยฐาน และอ่านบันทึกเบาะแสของโฮมส์ทั้ง 2 ข้อใหม่อีกครั้ง</p>
+        `;
+      }
+    }
+
+    /* =========================================================================
+       3. โมดูลที่ 2: ห้องแล็บเบเกอร์สตรีท (INTERACTIVE OUTLIER LAB)
+       ========================================================================= */
+    const SandboxPresets = {
+      tiktok: {
+        title: '📈 แผนภาพจุดมีชีวิต: ยอดวิวคลิป TikTok (หน่วย: พันวิว)',
+        unit: 'พันวิว',
+        data: [14, 18, 20, 20, 24, 26, 30, 32]
+      },
+      gaming: {
+        title: '📈 แผนภาพจุดมีชีวิต: เวลาเล่นเกมต่อสัปดาห์ (หน่วย: ชม.)',
+        unit: 'ชม./สัปดาห์',
+        data: [8, 10, 12, 12, 14, 16, 18, 22]
+      },
+      skins: {
+        title: '📈 แผนภาพจุดมีชีวิต: ราคาสกินในเกม (หน่วย: ร้อยบาท)',
+        unit: 'ร้อยบาท',
+        data: [15, 20, 20, 25, 30, 35, 40, 45]
+      }
+    };
+
+    const SandboxState = {
+      presetKey: 'tiktok',
+      points: [],
+      nextId: 1,
+      draggingId: null
+    };
+
+    function loadSandboxPreset(key) {
+      SoundFX.click();
+      SandboxState.presetKey = key;
+      const preset = SandboxPresets[key];
+      SandboxState.points = preset.data.map(v => ({ id: SandboxState.nextId++, val: v }));
+
+      ['tiktok', 'gaming', 'skins'].forEach(k => {
+        const b = document.getElementById(`preset-${k}`);
+        b.className = k === key
+          ? 'preset-btn btn-holmes min-h-[42px] px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold btn-brass'
+          : 'preset-btn btn-holmes min-h-[42px] px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-baker-700 text-parchment-200 border border-brass-500/35';
+      });
+
+      document.getElementById('lab-chart-title').textContent = preset.title;
+      document.getElementById('lab-unit-label').textContent = preset.unit;
+      renderSandbox();
+    }
+
+    function resetSandboxCurrent() {
+      loadSandboxPreset(SandboxState.presetKey);
+      showToast('รีเซ็ตข้อมูลห้องทดลองเรียบร้อย', 'info');
+    }
+
+    function addSandboxPoint(val) {
+      if (SandboxState.points.length >= 18) {
+        showToast('เพิ่มได้สูงสุด 18 จุด ลองลบจุดเก่าออกก่อนนะ!', 'info');
+        return;
+      }
+      SoundFX.success();
+      SandboxState.points.push({ id: SandboxState.nextId++, val });
+      renderSandbox();
+    }
+
+    function addSandboxRandomPoint() {
+      addSandboxPoint(Math.floor(Math.random() * 60) + 15);
+    }
+
+    function removeSandboxPoint(id) {
+      if (SandboxState.points.length <= 3) {
+        showToast('ต้องเหลือข้อมูลอย่างน้อย 3 จุดนะ!', 'error');
+        return;
+      }
+      SoundFX.click();
+      SandboxState.points = SandboxState.points.filter(p => p.id !== id);
+      renderSandbox();
+    }
+
+    const SVG_MIN_X = 45;
+    const SVG_MAX_X = 755;
+    const valToX = (val) => SVG_MIN_X + (val / 100) * (SVG_MAX_X - SVG_MIN_X);
+    const xToVal = (x) => Math.max(0, Math.min(100, Math.round(((x - SVG_MIN_X) / (SVG_MAX_X - SVG_MIN_X)) * 100)));
+
+    function renderSandbox() {
+      const values = SandboxState.points.map(p => p.val);
+      const stats = calcStats(values);
+      const diff = Math.abs(stats.mean - stats.median);
+
+      // ตรวจเช็กความสำเร็จขั้นที่ 1 ของภารกิจห้องทดลอง
+      if (diff >= 10 && !StudentState.labOutlierAchieved) {
+        StudentState.labOutlierAchieved = true;
+        SoundFX.success();
+        showToast('ผ่านขั้นที่ 1 แล้ว! Mean ห่างจาก Median เกิน 10 หน่วย ตอบคำถามขั้นที่ 2 ได้เลย ⚗️', 'success');
+      }
+      const step1El = document.getElementById('lab-step1-status');
+      if (StudentState.labOutlierAchieved) {
+        step1El.className = 'flex items-center gap-2 font-bold bg-emerald-100 border border-emerald-500 text-emerald-900 rounded-xl p-2.5';
+        step1El.innerHTML = '<span>✅</span><span>ขั้นที่ 1 สำเร็จ! คุณสร้างภาวะ Outlier จน Mean ห่างจาก Median ≥ 10 หน่วยแล้ว</span>';
+      } else {
+        step1El.className = 'flex items-center gap-2 font-semibold bg-parchment-50/80 border border-brass-600/30 rounded-xl p-2.5';
+        step1El.innerHTML = `<span>⬜</span><span>ขั้นที่ 1: ลากจุดหรือกดเพิ่ม Outlier จน Mean ห่างจาก Median อย่างน้อย <b>10 หน่วย</b> (ตอนนี้ห่าง ${diff.toFixed(1)})</span>`;
+      }
+
+      // 1. อัปเดตมาตรวัด
+      document.getElementById('lab-mean-val').textContent = stats.mean.toFixed(1);
+      document.getElementById('lab-mean-diff').textContent = `ห่าง ${diff.toFixed(1)}`;
+      document.getElementById('lab-median-val').textContent = Number.isInteger(stats.median) ? stats.median : stats.median.toFixed(1);
+      document.getElementById('lab-count-val').textContent = values.length;
+      document.getElementById('lab-mode-val').textContent = stats.modeText;
+
+      // 2. วาด SVG แผนภาพจุดพร้อมพื้นที่สัมผัสมือถือขนาดใหญ่
+      const svg = document.getElementById('sandbox-svg');
+      const axisY = 220;
+
+      const stackCounter = {};
+      const positionedPoints = [...SandboxState.points]
+        .sort((a, b) => a.val - b.val || a.id - b.id)
+        .map(p => {
+          const level = stackCounter[p.val] || 0;
+          stackCounter[p.val] = level + 1;
+          return { ...p, cx: valToX(p.val), cy: axisY - 24 - (level * 26) };
+        });
+
+      const meanX = valToX(stats.mean);
+      const medianX = valToX(stats.median);
+
+      let gridHTML = '';
+      for (let v = 0; v <= 100; v += 10) {
+        const x = valToX(v);
+        gridHTML += `
+          <line x1="${x}" y1="36" x2="${x}" y2="${axisY}" stroke="#3B2C21" stroke-width="1" stroke-dasharray="4 4" />
+          <line x1="${x}" y1="${axisY}" x2="${x}" y2="${axisY + 7}" stroke="#C59632" stroke-width="2" />
+          <text x="${x}" y="${axisY + 26}" text-anchor="middle" fill="#D4BC8B" font-size="14" font-weight="600">${v}</text>
+        `;
+      }
+
+      const markersHTML = `
+        <line x1="${medianX}" y1="34" x2="${medianX}" y2="${axisY}" stroke="#34D399" stroke-width="3.5" />
+        <rect x="${Math.min(700, Math.max(8, medianX - 48))}" y="6" width="96" height="26" rx="8" fill="#1B4332" stroke="#34D399" stroke-width="1.5" />
+        <text x="${Math.min(748, Math.max(56, medianX))}" y="23" text-anchor="middle" fill="#A7F3D0" font-size="13" font-weight="700">Median ${stats.median.toFixed(1)}</text>
+
+        <line x1="${meanX}" y1="62" x2="${meanX}" y2="${axisY}" stroke="#FB7185" stroke-width="3.5" stroke-dasharray="6 4" />
+        <rect x="${Math.min(704, Math.max(8, meanX - 46))}" y="36" width="92" height="26" rx="8" fill="#7C191D" stroke="#FB7185" stroke-width="1.5" />
+        <text x="${Math.min(750, Math.max(54, meanX))}" y="53" text-anchor="middle" fill="#FECDD3" font-size="13" font-weight="700">Mean ${stats.mean.toFixed(1)}</text>
+      `;
+
+      const dotsHTML = positionedPoints.map(p => {
+        const isDragging = SandboxState.draggingId === p.id;
+        const isOutlier = Math.abs(p.val - stats.median) >= 35;
+        const fill = isDragging ? '#FCF8EE' : (isOutlier ? '#FB7185' : '#DFB654');
+        return `
+          <g class="dot-group" data-id="${p.id}">
+            <!-- วงกลมโปร่งใสขนาดใหญ่พิเศษ ช่วยให้นิ้วบนมือถือจับลากได้ง่ายไม่พลาด -->
+            <circle cx="${p.cx}" cy="${p.cy}" r="24" fill="transparent"
+              class="draggable-dot"
+              onpointerdown="startDragDot(event, ${p.id})" />
+            <circle cx="${p.cx}" cy="${p.cy}" r="${isDragging ? 15 : 12}"
+              fill="${fill}" stroke="#120D0A" stroke-width="2.5"
+              class="draggable-dot ${isDragging ? 'dragging' : ''}"
+              pointer-events="none" />
+            <text x="${p.cx}" y="${p.cy + 4}" text-anchor="middle" fill="#120D0A" font-size="10" font-weight="800" pointer-events="none">${p.val}</text>
+          </g>
+        `;
+      }).join('');
+
+      svg.innerHTML = `
+        ${gridHTML}
+        <line x1="${SVG_MIN_X - 10}" y1="${axisY}" x2="${SVG_MAX_X + 10}" y2="${axisY}" stroke="#DFB654" stroke-width="3" stroke-linecap="round" />
+        ${markersHTML}
+        ${dotsHTML}
+      `;
+
+      // 3. แถบวิเคราะห์ผล
+      const insight = document.getElementById('lab-insight-banner');
+      if (diff >= 5) {
+        const dir = stats.mean > stats.median ? 'สูงขึ้นทางขวา' : 'ต่ำลงทางซ้าย';
+        insight.className = 'rounded-2xl p-3.5 sm:p-4 border-2 text-xs sm:text-base flex items-start gap-2.5 bg-crimson-800/40 border-rose-400/60 text-parchment-50';
+        insight.innerHTML = `
+          <span class="text-xl sm:text-2xl">🔥</span>
+          <div>
+            <b class="text-rose-300">พบผลกระทบของค่าผิดปกติ (Outlier)!</b> <b>ค่าเฉลี่ย (Mean = ${stats.mean.toFixed(1)})</b> ถูกดึง${dir}ห่างจาก <b>มัธยฐาน (Median = ${stats.median.toFixed(1)})</b> ถึง <b>${diff.toFixed(1)} หน่วย</b> ดังนั้นควรใช้ <b class="text-emerald-300">"มัธยฐาน"</b> เป็นตัวแทนข้อมูล!
+          </div>
+        `;
+      } else {
+        insight.className = 'rounded-2xl p-3.5 sm:p-4 border text-xs sm:text-base flex items-start gap-2.5 bg-forest-600/25 border-emerald-500/40 text-parchment-100';
+        insight.innerHTML = `
+          <span class="text-xl sm:text-2xl">✅</span>
+          <div>
+            <b class="text-emerald-300">ข้อมูลสมดุลดี!</b> Mean (${stats.mean.toFixed(1)}) และ Median (${stats.median.toFixed(1)}) ใกล้เคียงกัน ลองกด <b>"🚀 +Outlier สูง (96)"</b> หรือลากจุดไปขวาสุดเพื่อดูความเปลี่ยนแปลง!
+          </div>
+        `;
+      }
+
+      // 4. ฮิสโทแกรม
+      const binWidth = parseInt(document.getElementById('lab-bin-select').value, 10) || 10;
+      const bins = [];
+      for (let start = 0; start < 100; start += binWidth) {
+        const end = start + binWidth - (start + binWidth >= 100 ? 0 : 1);
+        const count = values.filter(v => (start + binWidth >= 100) ? (v >= start && v <= 100) : (v >= start && v < start + binWidth)).length;
+        bins.push({ label: `${start}-${end}`, count });
+      }
+      const maxCount = Math.max(...bins.map(b => b.count), 1);
+      document.getElementById('lab-histogram').innerHTML = bins.map(b => {
+        const hPct = Math.round((b.count / maxCount) * 100);
+        return `
+          <div class="flex-1 flex flex-col items-center justify-end h-full min-w-0">
+            <div class="text-[10px] font-bold text-brass-300 mb-0.5">${b.count > 0 ? b.count : ''}</div>
+            <div class="w-full max-w-[34px] rounded-t transition-all duration-150 ${b.count > 0 ? 'bg-gradient-to-t from-brass-600 to-brass-300' : 'bg-baker-800'}" style="height: ${Math.max(hPct, b.count > 0 ? 12 : 3)}%"></div>
+            <div class="text-[8px] sm:text-[9px] text-parchment-300 mt-1 truncate w-full text-center">${b.label}</div>
+          </div>
+        `;
+      }).join('');
+
+      // 5. ชิปข้อมูลที่กดลบได้
+      const chips = document.getElementById('lab-data-chips');
+      const sortedObjs = [...SandboxState.points].sort((a, b) => a.val - b.val);
+      chips.innerHTML = sortedObjs.map(p => `
+        <button onclick="removeSandboxPoint(${p.id})"
+          class="btn-holmes inline-flex items-center gap-1 bg-baker-800 hover:bg-crimson-700 border border-brass-500/40 px-2.5 py-1.5 rounded-lg text-xs font-bold text-parchment-100">
+          <span>${p.val}</span>
+          <span class="text-parchment-300 text-[10px]">✕</span>
+        </button>
+      `).join('');
+    }
+
+    function startDragDot(evt, id) {
+      evt.preventDefault();
+      SandboxState.draggingId = id;
+      const svg = document.getElementById('sandbox-svg');
+
+      const onMove = (moveEvt) => {
+        if (SandboxState.draggingId === null) return;
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((moveEvt.clientX - rect.left) / rect.width) * 800;
+        const newVal = xToVal(svgX);
+        const pt = SandboxState.points.find(p => p.id === SandboxState.draggingId);
+        if (pt && pt.val !== newVal) {
+          pt.val = newVal;
+          SoundFX.tick();
+          renderSandbox();
+        }
+      };
+
+      const onUp = () => {
+        SandboxState.draggingId = null;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        renderSandbox();
+      };
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      renderSandbox();
+    }
+
+    function submitLabQuiz(choice) {
+      if (!StudentState.labOutlierAchieved) {
+        SoundFX.error();
+        showToast('ลองทำขั้นที่ 1 ก่อนนะ! กดปุ่ม "+Outlier สูง" หรือลากจุดให้ Mean ห่างจาก Median เกิน 10 หน่วยก่อน', 'info');
+        return;
+      }
+      if (choice === 'median') {
+        SoundFX.success();
+        const firstTime = StudentState.scores.lab === 0;
+        StudentState.scores.lab = 25;
+        updateStudentUI();
+        saveScoreNow(false);
+        showToast(firstTime ? 'ถูกต้อง! มัธยฐานทนทานต่อค่าผิดปกติ รับไปเลย +25 คะแนน ⚗️' : 'ถูกต้องเป๊ะ! คุณได้รับ 25 คะแนนจากห้องแล็บนี้แล้ว', 'success');
+      } else {
+        SoundFX.error();
+        showToast('ยังไม่ถูกนะ! ลองดูเส้นบนกราฟว่าตัวไหนนิ่งไม่โดน Outlier ลากหนีไปไกล', 'error');
+      }
+    }
+
+    /* =========================================================================
+       4. โมดูลที่ 3: ศึก E-SPORTS STAT MANAGER (MORIARTY STAT CUP)
+       ========================================================================= */
+    const EsportsCandidates = [
+      {
+        id: 'p1', name: 'FlashFluke', role: 'Carry', avatar: '⚡', cost: 350,
+        tag: 'เคยทำสถิติสูงสุด 34 แต้มในนัดเดียว!',
+        matches: [2, 3, 3, 4, 4, 4, 5, 5, 6, 34],
+        isConsistent: false
+      },
+      {
+        id: 'p2', name: 'SteadyPro', role: 'Carry', avatar: '🛡️', cost: 350,
+        tag: 'เล่นเน้นชัวร์ ฟอร์มนิ่งทุกสนาม',
+        matches: [6, 6, 7, 7, 7, 8, 8, 8, 9, 9],
+        isConsistent: true
+      },
+      {
+        id: 'p3', name: 'BoomOrBust', role: 'Mid Lane', avatar: '🔥', cost: 300,
+        tag: 'สายบู๊วัดดวง ถ้าองค์ลงคือโหดมาก',
+        matches: [1, 2, 2, 3, 3, 4, 4, 5, 22, 24],
+        isConsistent: false
+      },
+      {
+        id: 'p4', name: 'CalmMind', role: 'Mid Lane', avatar: '🧠', cost: 320,
+        tag: 'คุมเกมแม่นยำ คะแนนไม่เคยตก',
+        matches: [5, 6, 6, 7, 7, 7, 7, 8, 8, 9],
+        isConsistent: true
+      },
+      {
+        id: 'p5', name: 'LuckyStar', role: 'Support', avatar: '🌟', cost: 320,
+        tag: 'เพิ่งแบกทีมชนะ 1 นัดด้วยแต้ม 29',
+        matches: [2, 2, 3, 3, 3, 4, 4, 5, 5, 29],
+        isConsistent: false
+      },
+      {
+        id: 'p6', name: 'IronGuard', role: 'Support', avatar: '💎', cost: 330,
+        tag: 'ซัพพอร์ตจอมอึด ช่วยทีมได้ทุกไฟต์',
+        matches: [5, 5, 6, 6, 7, 7, 7, 8, 8, 9],
+        isConsistent: true
+      }
+    ];
+
+    const EsportsState = {
+      maxBudget: 1000,
+      selectedIds: new Set()
+    };
+
+    function getRemainingBudget() {
+      let spent = 0;
+      EsportsState.selectedIds.forEach(id => {
+        const p = EsportsCandidates.find(c => c.id === id);
+        if (p) spent += p.cost;
+      });
+      return EsportsState.maxBudget - spent;
+    }
+
+    function toggleEsportsPlayer(id) {
+      const p = EsportsCandidates.find(c => c.id === id);
+      if (!p) return;
+
+      if (EsportsState.selectedIds.has(id)) {
+        SoundFX.click();
+        EsportsState.selectedIds.delete(id);
+      } else {
+        if (EsportsState.selectedIds.size >= 3) {
+          SoundFX.error();
+          showToast('เลือกครบ 3 คนแล้ว! กดนำคนเก่าออกก่อนนะ', 'error');
+          return;
+        }
+        if (getRemainingBudget() < p.cost) {
+          SoundFX.error();
+          showToast('งบ 1,000 ปอนด์ทองไม่พอ ลองจัดทัพใหม่นะ!', 'error');
+          return;
+        }
+        SoundFX.success();
+        EsportsState.selectedIds.add(id);
+      }
+      document.getElementById('esp-tourney-panel').classList.add('hidden');
+      renderEsportsRoster();
+    }
+
+    function resetEsportsTeam() {
+      SoundFX.click();
+      EsportsState.selectedIds.clear();
+      document.getElementById('esp-tourney-panel').classList.add('hidden');
+      renderEsportsRoster();
+    }
+
+    function renderEsportsRoster() {
+      const rem = getRemainingBudget();
+      const count = EsportsState.selectedIds.size;
+      const hideMedian = document.getElementById('esp-hide-median').checked;
+
+      document.getElementById('esp-budget').textContent = `${rem.toLocaleString()} 🪙`;
+      document.getElementById('esp-count').textContent = `${count} / 3 คน`;
+      document.getElementById('btn-start-tourney').disabled = count !== 3;
+
+      const grid = document.getElementById('esp-roster-grid');
+      grid.innerHTML = EsportsCandidates.map(p => {
+        const isSelected = EsportsState.selectedIds.has(p.id);
+        const st = calcStats(p.matches);
+
+        const bins = [
+          { lbl: '0-4', c: p.matches.filter(v => v <= 4).length, col: 'bg-rose-400' },
+          { lbl: '5-9', c: p.matches.filter(v => v >= 5 && v <= 9).length, col: 'bg-emerald-400' },
+          { lbl: '10-19', c: p.matches.filter(v => v >= 10 && v <= 19).length, col: 'bg-brass-300' },
+          { lbl: '20+', c: p.matches.filter(v => v >= 20).length, col: 'bg-amber-400' }
+        ];
+
+        return `
+          <div class="rounded-3xl p-4 sm:p-5 border-2 transition-all flex flex-col justify-between ${
+            isSelected
+              ? 'bg-crimson-800/35 border-brass-300 shadow-lg shadow-brass-500/20'
+              : 'victorian-card'
+          }">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-11 h-11 rounded-2xl bg-baker-950 border border-brass-500/40 flex items-center justify-center text-2xl">${p.avatar}</div>
+                  <div>
+                    <div class="font-display text-lg font-bold text-parchment-50 leading-tight">${p.name}</div>
+                    <div class="text-xs text-brass-300 font-bold">${p.role}</div>
+                  </div>
+                </div>
+                <span class="bg-baker-950 text-brass-300 border border-brass-400/50 px-2.5 py-1 rounded-xl font-display font-bold text-sm">
+                  ${p.cost} 🪙
+                </span>
+              </div>
+
+              <p class="text-xs text-parchment-300 mb-3 italic">"${p.tag}"</p>
+
+              <div class="bg-baker-950/90 border border-brass-500/30 rounded-2xl p-3 mb-3">
+                <div class="text-[10px] text-parchment-300 font-bold mb-1.5">ฮิสโทแกรมคะแนน 10 นัดย้อนหลัง</div>
+                <div class="h-14 flex items-end justify-around gap-2">
+                  ${bins.map(b => `
+                    <div class="flex-1 flex flex-col items-center justify-end h-full">
+                      <div class="text-[9px] text-parchment-200 font-bold">${b.c > 0 ? b.c : ''}</div>
+                      <div class="w-full max-w-[28px] rounded-t ${b.c > 0 ? b.col : 'bg-baker-800'}" style="height: ${Math.max((b.c / 10) * 100, b.c > 0 ? 14 : 4)}%"></div>
+                      <div class="text-[9px] text-parchment-300 mt-1">${b.lbl}</div>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="text-[10px] text-parchment-300 mt-2 pt-1.5 border-t border-baker-800 truncate">
+                  10 นัด: <span class="text-parchment-100">${p.matches.join(', ')}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 mb-3.5">
+                <div class="bg-baker-950 rounded-xl p-2 text-center border border-brass-500/30">
+                  <div class="text-[10px] text-rose-300 font-bold">ค่าเฉลี่ย (Mean)</div>
+                  <div class="font-display text-lg font-bold text-parchment-50">${st.mean.toFixed(1)}</div>
+                </div>
+                <div class="bg-baker-950 rounded-xl p-2 text-center border border-brass-500/30">
+                  <div class="text-[10px] text-emerald-300 font-bold">มัธยฐาน (Median)</div>
+                  <div class="font-display text-lg font-bold ${hideMedian ? 'text-parchment-300/40' : 'text-emerald-400'}">
+                    ${hideMedian ? '???' : st.median.toFixed(1)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="toggleEsportsPlayer('${p.id}')" class="btn-holmes w-full min-h-[44px] py-2.5 rounded-xl font-bold text-sm ${
+              isSelected
+                ? 'bg-crimson-700 text-parchment-50 border border-brass-400'
+                : 'btn-brass'
+            }">
+              ${isSelected ? '✕ นำออกจากทีม' : '+ ดึงตัวเข้าทีม'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startTournament() {
+      if (EsportsState.selectedIds.size !== 3) return;
+      SoundFX.success();
+
+      const team = [...EsportsState.selectedIds].map(id => EsportsCandidates.find(c => c.id === id));
+      const panel = document.getElementById('esp-tourney-panel');
+      panel.classList.remove('hidden');
+
+      let myWins = 0;
+      let aiWins = 0;
+      const logsHTML = [];
+
+      for (let round = 1; round <= 5; round++) {
+        const roundScores = team.map(p => ({
+          name: p.name,
+          score: p.matches[Math.floor(Math.random() * p.matches.length)]
+        }));
+        const myTotal = roundScores.reduce((acc, r) => acc + r.score, 0);
+        const aiTotal = 17 + Math.floor(Math.random() * 4);
+        const win = myTotal >= aiTotal;
+        if (win) myWins++; else aiWins++;
+
+        logsHTML.push(`
+          <div class="rounded-2xl p-2.5 sm:p-3 border text-center ${win ? 'bg-forest-600/35 border-emerald-400/60' : 'bg-crimson-800/45 border-rose-400/60'}">
+            <div class="text-[11px] font-bold text-parchment-200">นัดที่ ${round}</div>
+            <div class="font-display text-lg sm:text-xl font-bold my-0.5 ${win ? 'text-emerald-300' : 'text-rose-300'}">${myTotal} vs ${aiTotal}</div>
+            <div class="text-[11px] font-bold mb-1 ${win ? 'text-emerald-400' : 'text-rose-400'}">${win ? '🏆 ชนะ' : '💀 แพ้'}</div>
+            <div class="text-[10px] text-parchment-200 space-y-0.5">
+              ${roundScores.map(r => `<div class="truncate">${r.name}: <b>${r.score}</b></div>`).join('')}
+            </div>
+          </div>
+        `);
+      }
+
+      document.getElementById('esp-match-logs').innerHTML = logsHTML.join('');
+      const scoreEl = document.getElementById('esp-final-score');
+      scoreEl.textContent = `${myWins} - ${aiWins}`;
+      scoreEl.className = `font-display text-3xl sm:text-4xl font-bold bg-baker-950 px-5 py-2 rounded-2xl border-2 ${myWins > aiWins ? 'text-emerald-400 border-emerald-400' : 'text-rose-400 border-rose-400'}`;
+
+      const consistentCount = team.filter(p => p.isConsistent).length;
+      const analysisEl = document.getElementById('esp-post-analysis');
+
+      if (myWins > aiWins) {
+        const firstWin = StudentState.scores.esports === 0;
+        StudentState.scores.esports = 25;
+        updateStudentUI();
+        saveScoreNow(false);
+
+        analysisEl.className = 'rounded-2xl p-4 border-2 bg-forest-600/35 border-emerald-400 text-parchment-50';
+        analysisEl.innerHTML = `
+          <div class="font-display text-lg sm:text-xl font-bold text-emerald-300 mb-1">
+            🏆 ชัยชนะอันงดงามเหนือมอริอาร์ตี! (${myWins}-${aiWins}) ${firstWin ? '(+25 คะแนน)' : '(ได้รับ 25 คะแนนแล้ว)'}
+          </div>
+          <p>คุณเลือกผู้เล่นฟอร์มนิ่งได้ <b>${consistentCount} จาก 3 คน</b>! การวิเคราะห์ <b>มัธยฐาน (Median)</b> และ <b>ฮิสโทแกรม</b> ช่วยป้องกันไม่ให้เราหลงกลค่าเฉลี่ย (Mean) ที่ถูกดึงขึ้นเพราะฟลุ๊คแค่นัดเดียว</p>
+        `;
+        showToast('คว้าแชมป์ Moriarty Stat Cup! +25 คะแนน 🏆', 'success');
+      } else {
+        analysisEl.className = 'rounded-2xl p-4 border-2 bg-crimson-800/45 border-rose-400 text-parchment-50';
+        analysisEl.innerHTML = `
+          <div class="font-display text-lg sm:text-xl font-bold text-rose-300 mb-1">📉 เสียดายจัง! พ่ายแพ้ให้ทีม Moriarty AI (${myWins}-${aiWins})</div>
+          <p>ทีมคุณมีสายวัดดวงอยู่ <b>${3 - consistentCount} คน</b> แม้ค่าเฉลี่ยจะดูสูง 6-7 แต้ม แต่มัธยฐานต่ำมากเพราะมีแค่ 1-2 นัดที่ฟลุ๊คได้ 24-34 แต้ม (Outlier)! ลองเปลี่ยนตัวเป็นสาย <b>Median สูง</b> แล้วท้าชิงใหม่ได้เลย!</p>
+        `;
+      }
+
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* =========================================================================
+       5. เผยแพร่ฟังก์ชันทั้งหมดไปยัง window สำหรับ event handlers ใน HTML
+       ========================================================================= */
+    Object.assign(window, {
+      toggleSound,
+      switchModule,
+      openProfileModal,
+      closeProfileModal,
+      saveStudentProfile,
+      loadDetectiveCase,
+      selectSuspectCard,
+      placeIntoStem,
+      autoFillStemLeaf,
+      resetDetectivePlot,
+      renderDetectiveHistogram,
+      submitDetectiveArrest,
+      loadSandboxPreset,
+      addSandboxPoint,
+      addSandboxRandomPoint,
+      resetSandboxCurrent,
+      removeSandboxPoint,
+      renderSandbox,
+      startDragDot,
+      submitLabQuiz,
+      renderEsportsRoster,
+      toggleEsportsPlayer,
+      resetEsportsTeam,
+      startTournament,
+      saveScoreNow,
+      filterScoreboard,
+      copyScoreboardCSV
+    });
+
+    /* =========================================================================
+       6. เริ่มต้นระบบทั้งหมดเมื่อหน้าเว็บพร้อมใช้งาน
+       ========================================================================= */
+    function initApp() {
+      loadDetectiveCase(0);
+      loadSandboxPreset('tiktok');
+      renderEsportsRoster();
+      updateStudentUI();
+      initCloudStorage();
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
